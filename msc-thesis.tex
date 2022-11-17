@@ -1,0 +1,181 @@
+\documentclass{pracamgren}
+
+%\usepackage{color}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage[table, svgnames, dvipsnames]{xcolor}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{epsfig}
+\usepackage{pstricks}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage[backend=biber,style=authoryear-comp,sorting=nyt,maxcitenames=2,uniquename=false,uniquelist=false,maxbibnames=5,maxsortnames=1]{biblatex}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[hidelinks,allcolors=black]{hyperref}
+\usepackage{upgreek} 
+\usepackage{placeins}
+\renewcommand{\arraystretch}{1.1}
+
+\setlength{\parskip}{0pt}
+
+\addbibresource{msc-thesis.bib}
+
+\author{Maciej Manna}
+
+\nralbumu{1065745}
+
+\title{Massively Parallel Pseudo-Spectral DNS and~LES for Particle-Laden Turbulent Flows under Two-Way Momentum Coupling}
+
+\tytul{Masywnie równoległe pseudo-spektralne symulacje DNS i LES przepływów turbulentnych z\,cząstkami przy uwzględnieniu dwustronnego sprzężenia pędu}
+
+\kierunek{computer science}
+
+\opiekun{Dr. hab. Bogdan Rosa \\
+Warsaw University of Life Sciences -- SGGW \\
+Institute of Information Technology; \\
+Institute of Meteorology and Water Management \\ National Research Institute
+}
+
+\date{September 2022}
+
+\keywords{obliczeniowa mechanika płynów, przepływ turbulentny, przepływ wielofazowy, krople, mikrofizyka chmur, obliczenia dużej mocy, równania Naviera-Stokesa, homogeniczna izotropowa turbulencja, statystyki zderzeniowe kropel, metoda pseudo-spektralna, bezpośrednia symulacja numeryczna (DNS), metoda dużych wirów (LES), dwustronne sprzeżenie pędu, efekty grawitacyjne}
+
+\keywordsang{computational fluid mechanics, turbulent flow, multiphase flow, droplets, cloud microphysics, high performance computing, Navier-Stokes equations, homogeneous isotropic turbulence, droplet collision statistics, pseudo-spectral method, direct numerical simulation, large-eddy simulation, two-way momentum coupling, gravitational effects}
+
+
+\begin{document}
+\maketitle
+
+\streszczenie{
+Przepływy turbulentne z cząstkami fazy rozproszonej zachodzą nieustannie w środowisku naturalnym oraz znajdują liczne zastosowania w procesach przemysłowych.
+Ważnym tego przykładem są chmury atmosferyczne, które składają się z ogromnej ilości małych kropel wody i kryształków lodu.
+Wyjaśnienie wzajemnego oddziaływania powietrza (płynu) i aerozolu (cząstek) jest istotne w kontekście poznania mechanizmów rządzących powstawaniem i przebiegiem zjawisk atmosferycznych.
+Wiedza w tym zakresie jest użyteczna w obszarze meteorologii i służy do opracowywania coraz to bardziej realistycznych modeli powstawania opadu z kropel chmurowych.
+To z kolei prowadzi do podniesienia dokładności i sprawdzalności numerycznych prognoz pogody.
+Jednym ze sposobów badania przepływów dyspersyjnych są symulacje numeryczne. 
+\newline \indent
+Powszechnie stosowanym do tego celu narzędziem, zapewniającym wysoką dokładność, są tzw. bezpośrednie symulacje numeryczne (direct numerical simulation, DNS). 
+Za pomocą symulacji DNS można pozyskiwać statystyki zderzeniowe cząstek, które to są użyteczne jako parametry w modelach obejmujących większe skale przestrzenne.
+Symulacje DNS są~jednak kosztowne obliczeniowo, co ogranicza ich stosowalność do siatek o średnich rozmiarach (${\sim 2048^3}$ węzłów - przy współcześnie dostępnych zasobach obliczeniowych).
+DNS nie pozwalają modelować turbulencji charakteryzowanej wyższymi liczbami Reynoldsa ($R_{\lambda} \sim 10^4$), czyli takiej która obserwowana jest w powietrzu atmosferycznym. \newline \indent
+Metoda dużych wirów (large-eddy simulation, LES) stanowi alternatywę dla DNS.
+W tej metodzie drobnoskalowa turbulencja nie jest bezpośrednio rozwiązywana, ale jest parametryzowana przy użyciu modelu podskalowego.
+Umożliwia to modelowanie przepływów turbulentnych o większej liczbie Reynoldsa przy użyciu siatek o mniejszej liczbie węzłów.
+Ograniczenie złożoności obliczeniowej odbywa się jednak kosztem mniejszej precyzji i fizycznej dokładności.
+Niniejsza praca stanowi porównanie obu metod (DNS i LES), zarówno w kwestii fizycznej dokładności, jak i wydajności, skupiając się w szczególności na symulacjach z dwustronnym sprzężeniem pędu pomiędzy płynem i cząstkami. 
+Zostało wykazane, że LES stanowi obiecującą odpowiedź na ograniczenia DNSu, pomimo pewnych niedokładności wynikających z filtrowania turbulencji w najmniejszych skalach.
+Różnice te, w większości przypadków, stają się mniejsze, gdy uwzględni się dwustronne sprzężenie pędu, w szczególności dla cząstek poddanych działaniu grawitacji.
+\newline \indent
+Przeprowadzone zostały również analizy kosztów obliczeniowych obu metod.
+Choć zastosowanie LES zapewnia ogromną oszczędność w obliczeniach związanych z turbulentnym przepływem płynu, to jednak koszt ten znacząco rośnie wraz z liczbą cząstek.
+Niezbędna ilość symulowanych cząstek może zaś być duża, gdyż efekty dwustronnego sprzężenia pędu objawiają się wyraźniej w układach z względnie wysokim stosunkiem masy cząstek i płynu (pomiędzy $0.1$~i~$1$).
+Zatem obliczenia odnoszące się do dynamiki cząstek stanowią bardziej istotne ograniczenie dla LESu niż dla DNSu, gdzie złożoność obliczeń związanych z~płynem jest czynnikiem dominującym.
+Ponadto zidentyfikowano i przeanalizowano szereg parametrów, które pośrednio wpływają na czas trwania symulacji, takie jak np. promienie kropel oraz~działanie grawitacji.
+Na~koniec przedstawiono także wpływ preferencyjnego koncentrowania się cząstek na wariancję ich rozkładu pomiędzy równolegle wykonywanymi procesami.
+Ten czynnik ma~również istotne znaczenie w kontekście całkowitej wydajności symulacji.
+}
+
+\renewcommand{\abstractname}{Abstract}
+\begin{abstract}
+Turbulent fluid flows with dispersed particles are a common occurrence in nature, as~well~as in many technological processes.
+An important example of such systems are atmospheric clouds that consist of a huge number of small water droplets and ice crystals suspended in air.
+The~understanding of interplay between air (fluid) and aerosol (particles) is crucial for increasing the accuracy and reliability of numerical weather forecasts through more realistic modelling of atmospheric phenomena.
+Performing numerical simulations on a fine scale is one way of studying such processes.
+
+Direct numerical simulations (DNS) prove to be a relatively precise tool that is widely used in these studies.
+DNS can be used to obtain the particle collision statistics obtained from these simulations may be further utilised as parameterisations for larger-scale models.
+These simulations, however, are costly in terms of computational complexity, hence their application is limited to moderate-sized grids ($\sim 2048^3$ nodes, with the computing power of modern supercomputers).
+For that reason DNS are not able to resolve turbulence characterised by~higher Reynolds numbers ($R_{\lambda} \sim 10^4$), which is observed in atmospheric air.  
+
+Large-eddy simulations (LES) provide an alternative approach to DNS.
+In this method small-scale turbulence is not directly resolved but parameterised using a subgrid-scale model.
+This reduces the grid size required to achieve higher Reynolds numbers (and, thus, computational complexity) at the cost of diminished precision and physical fidelity. 
+This thesis provides comparison of DNS and LES, both in terms of physical fidelity and performance, focusing primarily on simulations under two-way momentum coupling between the fluid and particles.
+LES is shown to be a promising solution to limitations of DNS, even though it~exhibits certain inaccuracies that may be attributed to the filtering of small-scale vortical structures.
+These discrepancies, for the most part, become less pronounced when two-way momentum coupling is considered, especially for settling particles.
+
+Furthermore, a broader study of computational costs for both methods is presented.
+Even~though LES provides immense performance advantage when it comes to fluid simulation, it~is~highly susceptible to the growing number of individually tracked particles.
+The amount of particles that are needed may be considerable, as effects of two-way momentum coupling manifest when particle mass loadings are relatively high (between $0.1$ and $1$).
+Thus, computations related to particles are recognised to be a much more significant bottleneck for~LES than for DNS, where the complexity of fluid simulation is the largest concern.
+In~addition, several parameters that indirectly influence the execution time are identified and analysed, such as droplet radii or effects of gravity.
+Finally, it is shown that the preferential concentration of particles may affect the variance of their distribution between parallel processes and~consequently influence the overall simulation performance.
+ 
+\end{abstract}
+
+
+\tableofcontents
+
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{\numberline{}Acknowledgements}
+\label{ch:ack}
+
+NNN
+
+
+
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{\numberline{}Introduction}
+\label{ch:int}
+
+NNN
+
+
+\chapter{Numerical Methods}
+\label{ch:ch1}
+
+NNN
+
+
+\chapter{Physical Fidelity of DNS and LES Results}
+\label{ch:ch2}
+
+NNN
+
+
+
+\chapter{Comparison of DNS and LES Performance}
+\label{ch:ch3}
+
+NNN
+
+
+
+\chapter*{Conclusions}
+\addcontentsline{toc}{chapter}{\numberline{}Conclusions}
+\label{ch:end}
+
+NNN
+
+
+\appendix
+\chapter{Pseudo-Spectral Method in Detail}
+\label{app:psm}
+
+NNN
+
+
+
+\chapter{Effects of Subgrid-Scale Model on Flow Statistics}
+\label{app:sgs}
+
+NNN
+
+
+\chapter{Super-Particle Parametrisations in Simulations under Two-Way Momentum Coupling}
+\label{app:spp}
+
+NNN
+
+
+\addcontentsline{toc}{chapter}{\numberline{}References}
+\printbibliography[title=References]
+
+\end{document}
