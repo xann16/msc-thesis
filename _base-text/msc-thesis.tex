@@ -529,7 +529,7 @@ These simulations are said to involve \emph{two-way momentum coupling} (TWC).
 In TWC approach, we assume that cumulative force per unit mass exerted by particles on~the~fluid, denoted by $\mathbf{f}^{(p)}$ in Equation \ref{eqn:n-s}, is non-zero.
 Such contribution may be expressed as follows \parencite{Bosse2006,Monchaux2017,Rosa2022}:
 \begin{equation}
-\mathbf{f}^{(p)}(\mathbf{x}, t) = - \frac{M}{\rho_{p}} \sum_{k=1}^{N_{\text{part}}} m^{(k)}_{p} \left( \frac{ \mathbf{U}(\mathbf{Y}^{(k)}(t), t) - \mathbf{V}^{(k)}(t) }{\tau_{p}} \right) \delta \left( \mathbf{x} - \mathbf{V}^{(k)}(t) \right) ,
+\mathbf{f}^{(p)}(\mathbf{x}, t) = - \frac{M}{\rho_{p}} \sum_{k=1}^{N_{\text{part}}} m^{(k)}_{p} \left( \frac{ \mathbf{U}(\mathbf{Y}^{(k)}(t), t) - \mathbf{V}^{(k)}(t) }{\tau_{p}} \right) \delta \left( \mathbf{x} - \mathbf{Y}^{(k)}(t) \right) ,
 \label{eqn:twc-th}
 \end{equation}
 where most of the notation follows that from Equation \ref{eqn:owc}, except $m^{(k)}_{p}$ which denotes individual mass of $k$-th particle.
@@ -766,7 +766,7 @@ For convenience, both spectra are shown in log-log plot with proper normalisatio
 \centering
 \includegraphics[width=8cm]{img/plots/2-1-2a-spec.pdf}
 \caption{
-The normalised energy spectra of background turbulent flows for both DNS and LES. Dashed line provides comparison with $k^{-5/3}$ curve of theoretical Kolmogorov spectrum (see Equation \ref{eqn:kolm}) for inertial subrange.
+The normalised energy spectra of background turbulent flows for both DNS and LES. Dashed line provides comparison with $k^{-5/3}$ curve of theoretical Kolmogorov spectrum (see Equation~\ref{eqn:kolm}) for inertial subrange.
 }
 \label{fig:spec}
 \end{figure}
@@ -919,12 +919,12 @@ Results for DNS (top plots) show agreement with corresponding results in \textci
 Moreover, in this study data from simulations with higher mass loading is presented (there, it was limited to $\Phi_m = 0.747$), and~in~all~cases trends that were already observed continue further with increase in $\Phi_m$.
 
 Results of LES show promising alignment with those from DNS.
-It is important to recall that energy and dissipation spectra are directly available for smaller range of wavenumbers in LES, which coincides with part of DNS spectrum for, approximately $k \eta < 0.25$.
+It is important to recall that energy and dissipation spectra are directly available for smaller range of wavenumbers in LES, which coincides with part of DNS spectrum for approximately $k \eta < 0.25$.
 For non-settling particles, this is the part of energy and dissipation spectra in DNS that decrease with increasing mass loading, and it is also reflected in results for LES.
 Similarly, when effects of gravity are included, sharp increase in both spectra throughout all modes (for $|\mathbf{k}| > 2$) is~witnessed, as expected.
 
 The dual influence of TWC on energy spectrum for non-settling particles is known as ''pivoting'' \parencite{Squires1990,Bosse2006,Rosa2020}.
-The kinetic energy of fluid is suppressed for intermediate wavenumbers due to incresed energy dissipation, while it is increased for high wavenumbers due to combined effects of larger viscous dissipation and transfer of momentum from the particles to the fluid.
+The kinetic energy of fluid is suppressed for intermediate wavenumbers due to increased energy dissipation, while it is increased for high wavenumbers due to combined effects of larger viscous dissipation and transfer of momentum from the particles to the fluid.
 The increase of energy for small turbulent scales cannot be adequately represented in LES, in part due to the fact that used subgrid-scale model is agnostic to any momentum transfer form particles. 
 Similar remarks are valid for the settling particles, but here increase due to transfer of momentum from particles is larger and present throughout wide range of wavenumbers, and such transfer affects even intermediate turbulent scales that are directly resolved in LES.
 
@@ -945,7 +945,7 @@ Results are normalised using respective statistic for simulations without two-wa
 These results may be compared with those presented in \textcite[Fig. 11]{Rosa2020}, although mind difference in setup and scaling of x-axis, that is responsible for different outlook of plotted data.
 
 We can easily see that both statistics are increasing with $\Phi_m$ for settling particles, while in the absence of gravity the effect is opposite.
-Also trends in both $u'$ and $\epsilon$ is somewhat expected, as these statistics are somewhat related to the total kinetic energy of turbulence ($u' \propto \sqrt{E}$).
+Also trends in $u'$ and $\epsilon$ are somewhat expected, as both of these statistics are related to the total kinetic energy of turbulence ($u' \propto \sqrt{E}$).
 In particular, for settling particles, the steep increase of both statistics with particle mass loading may be explained by larger fluid velocity gradients caused by the fast settling particles.
 Also note, that due to different way of plotting results (relative to $\Phi_m$ and not number of particles), we may also observe that $u'$ is much more dependent on radii of individual droplets, while $\epsilon$ is much less sensitive to that, and seems to be mainly driven by the particle mass loading in the system.
 This difference may be seen in results for both DNS and LES.
@@ -1032,7 +1032,7 @@ This effect is attributed to tendency of heavier particles to accumulate in the 
 
 When gravity is not considered, the results of LES significantly underestimate the RDF, including peak values around $St=1$ being reduced by approximately $60 \%$ \parencite{Fede2006,Yang2008,Marchioli2008}.
 This difference may be attributed to filtering of~small-scale turbulence which has significant impact on concentration of particles of that size.
-On the other hand, LES is confirmed \parencite[see]{Rosa2017} to be much more accurate in predicting the RDF of settling particles.
+On the other hand, LES is confirmed \parencite[see][]{Rosa2017} to be much more accurate in predicting the RDF of settling particles.
 In general, it is argued that heavy settling particles due to increased velocity in the direction of gravity vector spend less time interacting with turbulent eddies and more uniformly sample the flow \parencite{Ireland2016}.
 This manifests, in general, in reduced clustering due to turbulence (lower RDF) for settling particles, irrespective of method used.
 This also explains why LES is much more accurate in~this~case, as filtered scales of turbulence have much more limited impact on particles, then in case of no gravity.
@@ -1047,7 +1047,7 @@ w_r = \mathbf{w} \cdot \frac{\mathbf{r}}{|\mathbf{r}|} ,
 \end{equation} 
 i.e. dot product of relative velocity with direction vector of their separation.
 Note, that $w_r$ is largest for two particles speeding towards each other.
-Relative velocities are averaged within shells and the fitted into exponential function in similar fashion as with the RDF.
+Relative velocities are averaged within shells and fitted into exponential function in a similar fashion as with the RDF.
 Then, they are averaged over time, to obtain $\langle|w_{r, 11}(r = R)|\rangle$, and finally normalised using the Kolmogorov velocity scale, $v_k$, to make resulting value dimensionless.
 
 Corresponding results of the RRV for simulations with one-way momentum coupling are presented in Figure \ref{fig:owcrdfrrv}.
@@ -1075,7 +1075,7 @@ In~general, such kernel is expressed as a symmetric matrix, $\mathbf{\Gamma}(t)$
 Here, we consider systems that are monodisperse, hence it reduces to single scalar quantity $\Gamma_{11}(t)$.
 This~statistic is of utmost importance, especially when atmospheric sciences is concerned, as ratio of droplet collision is important for many processes in cloud microphysics, such as droplet collisional growth and coalescence, which is the driving factor in formation of precipitation.   
 
-The collision kernel may be arduously computed by tracking all collision events in the system and normalizing it by the number of all possible particle pairs.
+The collision kernel may be arduously computed by tracking all collision events in the system and normalising it by the number of all possible particle pairs.
 Such value is referred to as the \emph{dynamic collision kernel} and denoted by $\Gamma^D_{11}(t)$, or just $\Gamma^D_{11}$ when averaged over~time.
 Statistical uncertainty of such process is calculated as in \textcite[Equation 17]{Rosa2013}.
 An~alternative formulation is the so-called \emph{kinematic collision kernel}, $\Gamma^K_{11}{t}$, based on \textcite{Sundaram1997}, where it is defined as a function of kinematic statistics computed in~previous section, and expressed by:
@@ -1136,7 +1136,7 @@ Three types of plots are used to showcase influence of two-way momentum coupling
 Firstly, they are plotted for selected fixed values of $\Phi_m$ depending on particle radii (see Figures \ref{fig:twcrdf}, \ref{fig:twcrrv}, and \ref{fig:twcgamma}; top row).
 These may be considered an extension of plots from Sections \ref{ssc:ch2.coll.rdfrrv} and \ref{ssc:ch2.coll.gamma}, since they also contain similar curves shown for OWC simulations, extended by additional ones that involve TWC with increasing mass loading.
 Remaining plots show droplet statistics for two radii ($30$~$\upmu\text{m}$ and $40$~$\upmu\text{m}$), chosen to represent particles most affected by turbulence (i.e. with $St \sim 1$), depending on the amount of particles in the system.
-Plots in the bottom row of Figures \ref{fig:twcrdf}, \ref{fig:twcrrv}, and \ref{fig:twcgamma} is limited to relatively small particle content (up to 20 million; equivalent to $\Phi_m \approx 0.15$ for $a = 40$~$\upmu\text{m}$).
+Plots in the bottom row of Figures \ref{fig:twcrdf}, \ref{fig:twcrrv}, and \ref{fig:twcgamma} are limited to relatively small particle content (up to 20 million; equivalent to $\Phi_m \approx 0.15$ for $a = 40$~$\upmu\text{m}$).
 The values obtained from OWC simulations are included for reference on the leftmost edge of the plot (i.e.~$0$~on~the~$X$-axis). 
 Results from simulations with broader range of mass loadings are shown in Figures \ref{fig:twcrdf}, \ref{fig:twcrrv}, and \ref{fig:twcgamma}.
 Simulations where super-particle parameterisation was used (i.e. $M>1$) are explicitly marked by dashed line.
@@ -1170,7 +1170,7 @@ The results of LES for non-settling particles are consistent with those of DNS i
 As observed in \textcite{Rosa2020} the RDF is barely sensitive to TWC and larger mass loadings (even as large as $\Phi_m = 1$, shown here) for both very small ($20$~$\upmu\text{m}$) and very large particles ($60$~$\upmu\text{m}$).
 It is so, because small inertia particles have little impact on turbulence modulation and their behaviour in dominated by the fluid flow, while heavy particles are not very sensitive to influence of turbulence in general, and turbulence modulated by other particles in particular.
 The same conclusion is valid for results from LES.
-One interesting difference, is the fact that results of LES are much less influenced by increasing mass loading.
+One interesting difference is the fact that results of LES are much less influenced by increasing mass loading.
 For $\Phi_m \le 0.1$ mass loading seems to have very little effect on the RDF, and it can be seen for very large number of particles ($\Phi_m = 0.5, \, 1$), but still it remains larger that for DNS with corresponding mass loadings.
 As shown before, see Section \ref{ssc:ch2.flow.twc}, large amount of heavy particles (when gravity is neglected) has tendency to weaken turbulence, which may result in reduced particle clustering.
 In LES, smallest turbulent scales are parameterised by subgrid-scale model which is agnostic to any momentum transfer from particles to fluid, hence such dampening of smallest fluctuations cannot happen.
@@ -1208,7 +1208,7 @@ This is consistent with previous observations and its explanation.
 When settling particles are considered, the results of LES seem to follow those from DNS more closely.
 In general, there is small overestimation on part of LES, but for the most part it remains within acceptable range.
 These discrepancies seem to be more significant for lighter particles, as they are more susceptible to TWC-agnostic turbulence from subgrid-scale model, as well as less capable of~turbulence modulation due to filtering of small-scale turbulence.
-For heavier particles ($40$~$\upmu\text{m}$ these differences are smaller in absolute value and show consistent overprediction.
+For heavier particles ($40$~$\upmu\text{m}$) these differences are smaller in absolute value and show consistent overprediction.
 Moreover, based on data from Figure \ref{fig:twcrdf} (top right), it is expected that for larger particles results for DNS and LES should be more and more aligned.
 
 As a side note, Figure \ref{fig:twcrdfext} is a great opportunity to showcase different regimes that depend on the amount of particles in the system.
@@ -1324,7 +1324,7 @@ Consistent with Figure \ref{fig:twcrdfext}.
 \label{fig:twcgammaext}
 \end{figure}
 
-When we analyse dependence of $\Gamma^D_{11}$ on the amount particles, again we can see that behaviour is different for non-settling and settling particles.
+When we analyse dependence of $\Gamma^D_{11}$ on the amount of particles, again we can see that behaviour is different for non-settling and settling particles.
 For the former, the collision kernel slightly decreases, while for the latter we can observe more definite increase in collision rate with increasing mass loading.
 The collision kernel estimated by LES is in relatively good agreement with results obtained by DNS, and discrepancies seem to diminish with increasing mass loading of the dispersed phase.
 What is interesting, even though kinematic statistics obtaied by DNS and LES were more aligned for particles of larger radius, $40$~$\upmu\text{m}$ in particular, for collision kernel we see the reverse.
@@ -1376,7 +1376,7 @@ For supercomputer \emph{Okeanos} (ICM UW), where each computational node compris
 
 These parameters, however, are only related to the fluid flow computations and do not impact the effort that is necessary to resolve particles and particle-fluid interactions in the system.
 This is especially vital in simulations with two-way momentum coupling, where particle-to-fluid ratio is of great importance, thus necessitating simulation of large numbers of computational particles to be tracked.
-This issue has been already hinted at previously, as this is main reason for introduction of the super-particle parametrisation to achieve systems with considerably larger mass loadings.
+This issue has been already hinted at previously, as this is main reason for introduction of the super-particle parameterisation to achieve systems with considerably larger mass loadings.
 Furthermore, it must be observed that codes used for DNS and LES are almost identical, barring additional LES code for computation of viscosity contribution from subgrid-scale model (see Table \ref{tab:code-steps}).
 This has some clear advantages, as it provides better method comparability and code maintainability.
 On the other hand, the parallel implementation of DNS is focused on splitting computations that become much less burdensome in LES as computations pertaining to particles tend to quickly dominate computational costs, as will be shown in the following sections.
@@ -1460,7 +1460,7 @@ On the other hand, gathering of particle-pair statistics (Stage 5) is mostly loc
 The only global aspect of its interprocess communication comes into play at the end, when all data is transferred to the one process that is responsible for disk I/O~operations.
 The~\texttt{MPI\_ALLREDUCE} calls in Stages 9 and 10 cover necessary summations over fluid energy spectrum in the Fourier space.
 In the former case, it is necessary to calculate and~redistribute to all processes the spectral-eddy viscosity in LES.
-For the last stage, such global synchronization is necessary due to application of large-scale forcing, which is implemented in a sequential manner.
+For the last stage, such global synchronisation is necessary due to application of large-scale forcing, which is implemented in a sequential manner.
 Also, to a limited degree, the data reduction along single axis is necessary in the symmetrisation of fluid velocity after Fourier transform \parencite{Ayala2014}. 
 Thus, we may observe that such synchronisation in LES-specific code should not negatively impact entire execution flow, as another global communication is imposed soon after for DNS as well. 
 
@@ -1515,7 +1515,7 @@ Moreover, in case of simulations with settling particles, the~impact of larger d
 In part, these results may be explained by the fact that size of the halo region used to compute two-point particle statistics becomes larger with particle radii.
 This means that more data related to the state of neighbouring particles needs to be transferred to the host process.
 This implementation detail may explain slight increase in computational cost, as in case of results without gravity, but hardly such increase as is observed when gravity is considered.
-More importantly, the clear difference between performance of simulations with and without gravity, predominantly for high inertia droplets ($a > 40$~$\upmu\text{m}$), cannot be explained in simple terms, as enabling gravity in the solver code should have no direct bearing on its computational complexity
+More importantly, the clear difference between performance of simulations with and without gravity, predominantly for high inertia droplets ($a > 40$~$\upmu\text{m}$), cannot be explained in simple terms, as enabling gravity in the solver code should have no direct bearing on its computational complexity.
 This effect shall be further examined in following sections.
 
 Note, that some attention was given to the effects of droplet radii on simulation performance, but other aspects have been emphasised.
@@ -1545,13 +1545,13 @@ Time-averaged wallclock times per step by itself (left) and multiplied by number
 The above observation is thoroughly confirmed by similar measurements made for simulations under two-way momentum coupling with varying number of particles (considering gravity).
 These results are shown in Figure \ref{fig:pfstwc}.
 When the number of particles is increased, execution times per step quickly become prohibitively large.
-That is the reason behind very limited range (up to 5 million) of particle counts in LES simulations, and any larger mass loadings had to be achieved via superparticle parametrisation.
+That is the reason behind very limited range (up to 5 million) of particle counts in LES simulations, and any larger mass loadings had to be achieved via superparticle parameterisation.
 This is in stark contrast with DNS, where simulations with 20 million computational particles could be easily performed.
 For illustration, on the hardware used to run these simulations (\emph{Okeanos}), the total running time of LES with more than 5 million particles would easily exceed 2 days (i.e. maximal time of a single job), while DNS with 20 million particles (largest used) would be able to compute almost $2.5$ times more time steps in the same amount of wallclock time.
 Longer simulation times are beneficial, as they result in lower statistical uncertainty of the modelled parameters.
 
 This result, even though expected, is much more severe than anticipated, and -- given this code and parallelisation architecture -- makes LES completely untenable for TWC simulations with even moderate mass loading.
-One simple remedy for this issue is the use of super-particle model, as in this study, but it combines two types of parametrisations, i.e.~superparticles and subgrid-scale model, whose interaction is not well known, thus rendering veracity of~such~results fragile at best.
+One simple remedy for this issue is the use of super-particle model, as in this study, but it combines two types of parameterisations, i.e.~superparticles and subgrid-scale model, whose interaction is not well known, thus rendering veracity of~such~results fragile at best.
 In the long run, the best solution would be establishing the parallelisation strategy for LES that relies not only on decomposition of grid used to compute fluid flow (as~with~current implementation, tailored for DNS) but also for particles, which clearly are the bottleneck.
 
 On another note, results shown in Figure \ref{fig:pfstwc} corroborate claims of \textcite{Rosa2022} that scaling of TWC DNS with respect to the number of particles is close to linear.
@@ -1563,7 +1563,7 @@ It was already mentioned that since this study is confined to one specified grid
 Instead, figure \ref{fig:pfspfn} shows wallclock times for a range of DNS simulations in relation to maximal number of computational nodes on supercomputer \emph{Okeanos} (24 CPU cores per node) that were set as a~hard limit for the running code to utilise.
 It is important to point out that these simulations still exhibit standard grid size and division into subdomains (see Table \ref{tab:perfs-params}).
 Thus, optimal number of~parallel processes executing the code remained unchanged.
-These results, therefore, provide information on the performance of simulations when it is starved for resources, i.e.~the ratio of executing processes and available CPU cores is less than $1$.
+These results, therefore, provide information on the performance of simulations when it is starved for resources, i.e.~the ratio of executing processes and available CPU cores is more than $1$.
 
 \begin{figure}[h]
 \centering
@@ -1669,7 +1669,7 @@ Finally, the performance measurements that depend on less obvious parameter are 
 As outlined in Section \ref{ssc:ch2.coll.rdfrrv}, the RDF is meant as a statistical measure of preferential clustering of particles within the domain.
 Statistically speaking, system with $g_{11}(r) = 1$ should exhibit almost uniform distribution of~particles, while higher values indicate increasing deviations from it, i.e. presence of more regions with high particle concentration (clusters) and emptier regions between them.
 In the context of performance measurements and domain decomposition for parallel computation, this raises a question, whether such nonuniformity in particle distribution may affect simulation performance.
-The broad analytical and experimental study of \textcite{Ayala2014} was performed under the assumption that simulated systems, on average, exhibit ``a reasonable computational load balance using a static domain decomposition parallelization scheme''.
+The broad analytical and experimental study of \textcite{Ayala2014} was performed under the assumption that simulated systems, on average, exhibit ``a reasonable computational load balance using a static domain decomposition parallelisation scheme''.
 We~shall examine whether such hypothesis is admissible, especially for smaller grids used in this study, which may be more prone to nonuniformities in the particle distribution.
 
 It was previously noted that there are stages during the processing of every time step that require global data synchronisation.
@@ -1679,7 +1679,7 @@ As an initial hypothesis, we may expect more variance in distribution of particl
 Interestingly enough, the results presented in Figure \ref{fig:pfsrdf} seem to support such conjecture.
 The WCT per step are plotted against estimated values of the RDF for DNS (left) and LES (right).
 The timings for these plots were obtained from TWC simulations with the same number of computational particles and compared only within same particle radii, to eliminate influence on any other already observed dependencies.
-The range of different values of the RDF were obtained by varying the super-particle parametrisation factor, $M$, which should have no direct bearing on computation times, while affecting the RDF via turbulence modulation (see~Figure~\ref{fig:twcrdfext}). 
+The range of different values of the RDF were obtained by varying the super-particle parameterisation factor, $M$, which should have no direct bearing on computation times, while affecting the RDF via turbulence modulation (see~Figure~\ref{fig:twcrdfext}). 
 Note that only simulations with gravity were used, and it might strengthen shown dependence.
 This can be explained by the creation of elongated, column-like clusters of settling particles that are arranged in the same direction as subdomain ``pencils''.
 
@@ -1807,8 +1807,8 @@ In more practical terms, that particular stage seems to be the main bottleneck t
 \caption{
 Performance profile for TWC LES simulations with gravity for droplets with $40$~$\upmu\text{m}$ radius.
 Consistent with Figure \ref{fig:pffowcles}.
-Both plots present profiles for the same simulations, but the one the right focuses on smaller range on the $Y$-axis to ``magnify'' data pertaining to timings other than $T_5$ ($ = T_{\text{Pd}}$).
-The leftmost profile ($0$ on $X$-axis) was given for corresponding OWC simulation with~$N_{\text{part}} = 0.8\text{M}$. 
+Both plots present profiles for the same simulations, but the one on the right focuses on smaller range on the $Y$-axis to ``magnify'' data pertaining to timings other than $T_5$ ($ = T_{\text{Pd}}$).
+The left profile ($0$ on $X$-axis) was given for corresponding OWC simulation with~$N_{\text{part}} = 0.8\text{M}$. 
 }
 \label{fig:pfftwcles}
 \end{figure}
@@ -1818,7 +1818,7 @@ The relevant data is shown in Figure \ref{fig:pfftwcles}.
 Previously (see Figure \ref{fig:pfstwc}) it was pointed out that the computational cost of LES blows up at even moderate increase of $N_{\text{part}}$.
 It was attributed to the larger share of particles that each process has to deal with, since the total number of subdomains is reduced $4$-fold with respect to DNS (see Table \ref{tab:perfs-params}).
 The rate of this increase, however, was greater than anticipated, and we can conclude that it is not merely due to larger computational burden for the particle solver, but predominately due to the postprocessing stage.
-Since the main goal of this study requires collection of the particle-pair statistics, the effort required for such calculations approximately scales with the square of the number of particles per subdomain (for more details, see theoretical analysis in Appendix C of \textcite{Ayala2014}.
+Since the main goal of this study requires collection of the particle-pair statistics, the effort required for such calculations approximately scales with the square of the number of particles per subdomain (for more details, see theoretical analysis in Appendix C of \textcite{Ayala2014}).
 Still, even this explanation is not enough to account for such enormous increase.
 Such insight, however, is sufficient to explain that $T_{\text{Pd}}$ becomes dominant contributor to each time step not only for~LES but also for DNS when $N_{\text{part}}$ becomes large enough.
 
@@ -1845,7 +1845,7 @@ Such increase, however, is not overwhelming as in case of LES where, at least fo
 \centering
 \includegraphics[width=13.5cm]{img/plots/3-3f-pfftwcex.pdf}
 \caption{
-The ratio of average wallclock times spent on processing particles, $T_{\text{P}}$, and the fluid flow, $T_{\text{P}}$ (left, linear-log scale); and average percentage of overall step time occupied by particle postprocessing tasks, $(T_{\text{Pd}} / T)$ (right), for TWC simulations with with gravity.
+The ratio of average wallclock times spent on processing particles, $T_{\text{P}}$, and the fluid flow, $T_{\text{F}}$ (left, linear-log scale); and average percentage of overall step time occupied by particle postprocessing tasks, $(T_{\text{Pd}} / T)$ (right), for TWC simulations with gravity.
 Plots for LES on the right have slight horizontal offset added to make uncertainty bars more visible.
 }
 \label{fig:pfftwcex}
@@ -1979,7 +1979,7 @@ For completeness, note that only remaining section of the code (timing-wise) not
 As shown before, however, $T_{\text{F}}$ is roughly constant for all simulations of the same type, hence it clearly does not demonstrate any dependence on the RDF.
 
 These section have repeatedly shown that nonuniformities in particle distribution between subdomains may indeed have significant bearing on the computational costs of simulations in~question.
-Moreover, these effects seem to manifest for the most part in the stage where postproessing of particle-pair statistics is performed (Stage 5).
+Moreover, these effects seem to manifest for the most part in the stage where postprocessing of particle-pair statistics is performed (Stage 5).
 This claim, however, needs more granular profile data, especially when it comes to interprocess communication, for more direct validation.
 In the following section, though, another approach to that important question shall be taken.
 
@@ -1989,14 +1989,14 @@ In the following section, though, another approach to that important question sh
 \label{sc:ch3.perfp}
 
 
-The aim of this section is to address the hypothesis that the distribution of particles among subdomains may have significant impact on the compuational performance of simulations.
+The aim of this section is to address the hypothesis that the distribution of particles among subdomains may have significant impact on the computational performance of simulations.
 Such notion was appearing throughout this chapter mainly in two contexts.
 Firstly, it was shown that there is a correlation between the average wallclock times of the entire iteration (and, in particular, of the particle postprocessing stage) and the RDF (see Figures \ref{fig:pfsrdf} and \ref{fig:pffrdfpd}).
 The RDF is related to particle accumulation, yet it is a continuous physical statistic that cannot be directly translated to discrete and implementation-driven parameter that is of~interest at this point.
 Moreover, the RDF measures local density of particle pairs \parencite{Grabowski2013}, particularly when it is considered at contact distance.
 Here, this locality is understood to include much smaller ranges than physical dimensions of the entire subdomain.   
 Secondly, the differences between particle counts in individual processes may explain larger than expected impact of the particle postprocessing stage on the computational complexity of~simulations.
-This may be due to the final synchronisation of all processes at the end of~Stage 5 that ties the performance of the entire simulation to the efficiency of the most particle-laden process at any given time step.
+This may be due to the final synchronisation of all processes at the end of~Stage~5 that ties the performance of the entire simulation to the efficiency of the most particle-laden process at any given time step.
 Also, the quadratic dependence of these calculations on the number of particles in subdomains exacerbates such effect.
 Still, the above evidence is only cursory and more direct approach is required.
 
@@ -2220,7 +2220,7 @@ Both approaches produce results that are, for the most part, well within the mar
 The only significant discrepancy is for droplets of radii $60$~$\upmu\text{m}$, especially in the case of the RDF.
 The reason for this difference, however, does not lie in the implementation of the numerical model, but in the physics of the problem.
 Settling of high inertia particles leads to formation of elongated clusters that can remain stable for a long time.
-Hence, RDF reveals a stronger dependence on initial conditions or, in other words, on a given realization.
+Hence, RDF reveals a stronger dependence on initial conditions or, in other words, on a given realisation.
 In general, the use of alternative direction of gravity in the pseudo-spectral solver requires broader examination in order to fully demonstrate that it guarantees consistency of physical results and provides reproducible performance gains (within certain bounds of applicability, i.e. for heavy settling particles).
 
 \begin{figure}[!h]
@@ -2239,7 +2239,7 @@ Consistent with Figure \ref{fig:pfpgridowcmax}.
 \medskip
 
 In addition, Figures \ref{fig:pfpgridtwcmax} and \ref{fig:pfpgridrdfstd} are presented as an additional illustration of the particle distribution statistics for TWC simulations.
-Firstly, note that the range of the particle count maxima attained by TWC simulations are considerably smaller than those under one-way momentum coupling (see Figure \ref{fig:pfpgridowcmax}.
+Firstly, note that the range of the particle count maxima attained by TWC simulations are considerably smaller than those under one-way momentum coupling (see Figure \ref{fig:pfpgridowcmax}).
 This is due to smaller droplet radii (with radii $30$,~$40$~$\upmu\text{m}$).
 For $a = 30$~$\upmu\text{m}$ almost no appreciable difference in plots can be noticed when $N_{\text{part}}$ increases.
 This is consistent with previously shown statistics (Figure \ref{fig:pfptwc}) and respective RDF (Figure \ref{fig:twcrdfext}).
@@ -2277,7 +2277,7 @@ The usage of deterministic forcing with LES simulations is also a new contributi
 Another important aspect of this study is the broad analysis of the computational costs of such simulations, including in-depth code profiling and unique attempt to tie code performance to the distribution of~particles among subdomains.
 
 The comparison of turbulent flow statistics and collisional particle statistics shows that LES may be considered as a promising alternative to DNS and a way to simulate systems characterised by higher Reynolds numbers, closer to those of real-life atmospheric air turbulence.
-Due to used parametrisation of small-scale turbulence, however, some level of inaccuracy has to be expected.
+Due to used parameterisation of small-scale turbulence, however, some level of inaccuracy has to be expected.
 In case of one-way momentum coupling these effects were already studied, and are confirmed here, as they are also applicable to some degree under two-way momentum coupling.
 In particular, the underestimation of the radial distribution function and overestimation of radial relative velocities are observed with two-way coupling, although such discrepancies diminish with the increase of particle mass loading.
 Interestingly, these effects tend to cancel each other when collision kernel is considered, especially for particles of radius of $30$~$\upmu\text{m}$ ($St \approx 0.5$).
@@ -2289,7 +2289,7 @@ Such particles tend to strongly modulate small-scale turbulence, which is filter
 The main issue here seems to be that subgrid-scale model used in this study is agnostic to the influence of particles on the fluid, hence any turbulence modulation that affects predominantly small scales has no effect.
 This limits indirect influences that neighbouring particles exert on each other by affecting background flow.
 Thus, it is a~viable direction to conduct similar studies as this one but focusing on different subgrid-scale models that may alleviate some of aforementioned drawbacks.
-The~far-reaching goal here, would be the development of the ''hybrid'' model that could use the information about the~state of particles to adjust its parametrisation of small scale turbulence.
+The~far-reaching goal here, would be the development of the ''hybrid'' model that could use the information about the~state of particles to adjust its parameterisation of small scale turbulence.
 
 The analysis of computational performance have shown major difference in bottlenecks that need to be addressed for DNS and LES.
 The implementation of pseudo-spectral solver that was used in this study was developed with DNS in mind, therefore its parallelisation strategy is focused on evenly splitting considerable burden associated with the integration of the fluid flow.
@@ -2307,7 +2307,7 @@ The key issue here is splitting the computations associated with particles betwe
 The simplest solution would be to consider several independent sets of particles, as was proposed by \textcite{Ayala2014}, or further subdivide the computational domain along physical boundaries, e.g. using 3D decomposition only for particle-related workload.
 Both of these solutions have its own issues and need to be thoroughly examined to obtain expected computational performance and scaling.
 In general, for both DNS and LES, the stage devoted to the postprocessing of particle statistics was found to be one of the main bottlenecks.
-The core of its calculations is the cell-index method coupled with the concept of linked lists a proposed by \textcite{Allen1987}.
+The core of its calculations is the cell-index method coupled with the concept of linked lists proposed by \textcite{Allen1987}.
 This approach is well-established in studies like this, but may be the prime candidate for optimisation efforts that would prove relevant for the efficiency of numerical experiments focused on collision statistics.
 Also, since it was established that the variance of particle distribution in the domain may be an important factor when simulating particle-laden turbulent flows, a degree of adaptivity may be considered.
 For example, certain data structures specific to computer graphics and point cloud processing, such as quadtrees, octrees, or K-d trees, may be used to enhance currently used methods.
@@ -2350,7 +2350,7 @@ where summation is defined over all nodes in physical space.
 Conversely, to obtain physical velocity back from the Fourier coefficients, we apply the \emph{inverse discrete Fourier transform}, expressed as follows:
 \begin{align*}
 \mathbf{U}(\mathbf{x}, t) &= \sum_{\mathbf{k}} \mathbf{\hat{U}} (\mathbf{k}, t) \exp(i \mathbf{k} \cdot \mathbf{x}) \\
-                          &= \sum_{k_1 = - \frac{N}{2} + 1}^{\frac{N}{2}} \sum_{k_2 = - \frac{N}{2} + 1}^{\frac{N}{2}} \sum_{k_3 = - \frac{N}{2} + 1}^{\frac{N}{2}} \mathbf{\hat{U}}((k_1, k_2, k_3), t) \exp(- \frac{2 \pi i}{N}(n_1 k_1 + n_2 k_2 + n_3 k_3)) \, .
+                          &= \sum_{k_1 = - \frac{N}{2} + 1}^{\frac{N}{2}} \sum_{k_2 = - \frac{N}{2} + 1}^{\frac{N}{2}} \sum_{k_3 = - \frac{N}{2} + 1}^{\frac{N}{2}} \mathbf{\hat{U}}((k_1, k_2, k_3), t) \exp \left( - \frac{2 \pi i}{N}(n_1 k_1 + n_2 k_2 + n_3 k_3) \right) \, .
 \end{align*}
 
 Since periodic boundary condition are imposed, we have
@@ -2370,17 +2370,17 @@ In physical (position) space \emph{Navier-Stokes equations} include both \emph{c
 and \emph{momentum equation}:
 \begin{equation}
 \label{eqn:mom}
-\frac{\partial}{\partial t} \mathbf{U} = \mathbf{U} \times \boldsymbol{\omega} - \nabla (\frac{P}{\rho} + \frac{U^2}{2}) + \nu \nabla^2 \mathbf{U} + \mathbf{f} \, ,
+\frac{\partial}{\partial t} \mathbf{U} = \mathbf{U} \times \boldsymbol{\omega} - \nabla \left( \frac{P}{\rho} + \frac{U^2}{2} \right) + \nu \nabla^2 \mathbf{U} + \mathbf{f} \, ,
 \end{equation}
 where $\mathbf{U} := \mathbf{U}(\mathbf{x}, t)$ is a fluid velocity field (note: $U^2 = \mathbf{U} \cdot \mathbf{U}$), $ \boldsymbol{\omega} := \boldsymbol{\omega}(\mathbf{x}, t) = \nabla \times \mathbf{U}(\mathbf{x}, t) $ is its vorticity, $\mathbf{f} := \mathbf{f}(\mathbf{x}, t)$ is a large scale force (acting on large turbulent scales, i.e. affecting only low wavenumbers), $P$ is pressure, $\rho$ is constant density of a fluid, and $\nu$ -- its kinematic viscosity.
 
 On the right hand side of equation (\ref{eqn:mom}) first two terms represent two parts of a \emph{nonlinear term}. They are obtained using following identity:
-$$ - \mathbf{U} \cdot \nabla \mathbf{U} = \mathbf{U} \times \boldsymbol{\omega} - \nabla (\frac{U^2}{2}) \, . $$
+$$ - \mathbf{U} \cdot \nabla \mathbf{U} = \mathbf{U} \times \boldsymbol{\omega} - \nabla \left( \frac{U^2}{2} \right) \, . $$
 For convenience, we will use following notation for these terms:
 $$ \mathbf{N_1} := \mathbf{U} \times \boldsymbol{\omega} $$
 and, for the scalar part, the gradient of which is the second term, we define:
 $$ N_2 := \frac{P}{\rho} + \frac{U^2}{2} \, . $$
-As for remaining terms, third one expresses effects of kinematic viscosity (diffusive term), while the last one - effects of large scale forces acting on the fluid.
+As for remaining terms, third one expresses effects of kinematic viscosity (diffusive term), while the last one effects of large scale forces acting on the fluid.
 
 When we transition to the \emph{spectral space} (also referred to as the \emph{wavenumber} or \emph{Fourier} space), the momentum equation (\ref{eqn:mom}) becomes:
 \begin{equation}
@@ -2429,7 +2429,7 @@ k_1 \\ k_2 \\ k_3
 =
 \begin{bmatrix}
 \text{fac1}(1 \rightarrow N + 2) \\ \text{fac2}(1 \rightarrow N) \\ \text{fac3}(1 \rightarrow N)
-\end{bmatrix}
+\end{bmatrix} ,
 \quad
 k^2 =
 \begin{bmatrix}
@@ -2458,7 +2458,7 @@ In broad terms, the pseudo-spectral method is characterised by using a mixture o
 The spatial derivatives are evaluated in the wavenumber space.
 Then, to facilitate computation, the cross products are calculated in the physical space.
 
-Specifically, to describe one entire step of evolution in time of the model, we assume that the problem has been already solved for the former time steps up to n, i.e.  following velocity fields are known
+Specifically, to describe one entire step of evolution in time of the model, we assume that the problem has been already solved for the former time steps up to $n$, i.e.  following velocity fields are known
 $$ \mathbf{\hat{U}}(\mathbf{k}, \Delta t) , \, \mathbf{\hat{U}}(\mathbf{k}, 2 \Delta t) , \, \ldots , \, \mathbf{\hat{U}}(\mathbf{k}, n \Delta t) \, .  $$
 The further procedure to solve for $\mathbf{\hat{U}}(\mathbf{k}, (n+1) \Delta t)$ consists of four steps:
 \begin{enumerate}
@@ -2489,7 +2489,7 @@ Note, that such operation introduces aliasing, which needs to be countered at ea
 \end{align}
 where we have applied: 
 \begin{enumerate}
-\item \emph{Adam-Bashforth scheme} of the second order for  nonlinear term (i.e first two terms that involve $\mathbf{\hat{N}_1}$),
+\item \emph{Adam-Bashforth scheme} of the second order for  nonlinear term (i.e. first two terms that involve $\mathbf{\hat{N}_1}$),
 \item \emph{Crank-Nicholson scheme} (second-order) for diffusive term (third line on the right hand side of above equation),
 \item \emph{explicit Euler scheme} for forcing term including $\mathbf{\hat{f}}$.
 \end{enumerate}
@@ -2539,7 +2539,7 @@ Having known the velocity at the current time step the pressure can be easily re
 \subsubsection{Notes on TWC Simulations}
 
 For simulations under two-way momentum coupling (TWC), another external forcing term, $\mathbf{f}^{(p)}(\mathbf{x},t)$, is present in the equation (\ref{eqn:mom}), and it represents momentum transfer from particles to the fluid.
-This term is naturally obtained in physical space, and then it is added to the precomputed nonlinear as described in step $(3)$ of the solution procedure.
+This term is naturally obtained in physical space, and then it is added to the precomputed nonlinear term as described in step $(3)$ of the solution procedure.
 The sum of both terms is transferred to the Fourier space by making use of the FFT.
 The algorithm of FFT has relatively high computational cost, therefore calling it one more time just for that additional term would be wasteful, if it can be avoided.
 And, since Fourier transform is linear, i.e.:
@@ -2612,7 +2612,7 @@ In particular, we eliminate spectral-eddy viscosity dependence on $k$ by calcula
 where $E(k)$ is the energy spectrum and $\nu_{e}(k|k_c)$ is defined by Equation \ref{eqn:sgs-1}.
 This way we can define SGS-adjusted, or effective, viscosity as: $\nu_{\text{eff}} = \nu + \bar{\nu}_{\text{SGS}}$.
 For completeness, we assume that in DNS $\bar{\nu}_{\text{SGS}} \equiv 0$ so that $\nu_{\text{eff}} = \nu$.
-Now, we may calculate effective counterparts to flow statistics by replacing $\nu$ with $\nu){\text{eff}}$ in their definitions.
+Now, we may calculate effective counterparts to flow statistics by replacing $\nu$ with $\nu_{\text{eff}}$ in their definitions.
 For example, consider the Kolmogorov length scale, $\eta$, and its effective equivalent:
 $$
 \eta = \left( \frac{\nu^3}{\epsilon} \right)^{1/4} , \quad \quad \eta_{\text{eff}} = \left( \frac{\nu_{\text{eff}}^3}{\epsilon} \right)^{1/4} = \left( \frac{(\nu + \bar{\nu}_{\text{SGS}})^3}{\epsilon} \right)^{1/4} .
@@ -2667,14 +2667,14 @@ Still, we use effective value of $R_{\lambda}$ for LES simulations, but it must 
 
 
 
-\chapter{Super-Particle Parametrisations in Simulations under Two-Way Momentum Coupling}
+\chapter{Super-Particle Parameterisations in Simulations under Two-Way Momentum Coupling}
 \label{app:spp}
 
 This appendix serves as a technical reference for simulations under two-way momentum coupling.
 It is specified where exactly super-particle parameterisation was used and with what exactly value of parameter $M$, i.e. the ratio between effective number of physical particles and actual number of individually tracked computational particles.
 In addition, tables presented here provide cross-reference between the effective number of particles and the particle mass loading for simulations referred to be either of these measures of particle amount.
 Note that LES requires higher values of $M$, since setup used in this study did not allow to effectively perform simulations with more than 5 million computational particles (as opposed to DNS, where 10 or 20 million particles were perfectly manageable).
-Also, for more information on the impact of super-particle parametrisation on the accuracy of collisional statistics of particles, please refer to brief analysis in \textcite{Rosa2022}.  
+Also, for more information on the impact of super-particle parameterisation on the accuracy of collisional statistics of particles, please refer to brief analysis in \textcite{Rosa2022}.  
 
 \begin{table}[h]
 \centering
@@ -2740,10 +2740,10 @@ $\Phi_m$ [$a = 40$~$\upmu\text{m}$] & 0.22 & 0.30 & 0.44 & 0.59 & 0.74 & 0.89 & 
 \end{table}
 
 
-For DNS, all simulations up to 20 million particles were performed without super-particle parametrisation.
+For DNS, all simulations up to 20 million particles were performed without super-particle parameterisation.
 For larger $N_{\text{part}}$, simulations with 10 million computation particles were used, where $M$ was set to value given by target effective number of particles divided by 10~million, up to $M = 40$ for simulations with 400 million particles.
 Similar approach was used for LES, but due to technical limitations largest workable amount of computational particles tracked was limited to 5 million.
-For that reason, simulations with between 6 and 20 million particles also required super-particle parameterisation, with small values of $M$, as listed in Table \ref{tab:spp-base}.
+For that reason, simulations with number of particles between 6 and 20 million also required super-particle parameterisation, with small values of $M$, as listed in Table \ref{tab:spp-base}.
 For values larger than 20 million simulations with 5 million computational particles were employed, thus resulting in two times larger values of $M$ than in DNS for the same target number of particles (up to $M=80$ for simulation with 400 million effective particles).
 
 
