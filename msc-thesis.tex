@@ -340,7 +340,305 @@ Also, more in-depth profiling data shall be presented, as well as analysis of pa
 \chapter{Numerical Methods}
 \label{ch:ch1}
 
-NNN
+The challenges of numerical modelling of particle-laden turbulent flows are manifold and are mainly associated with the need to keep track of evolution of two distinct phases---continuous fluid flow and discrete particles---as well as their interactions.
+In this study, the standard Eulerian-Lagrangian approach is used.
+It introduces two different representations for two phases: velocity field of turbulent flow is evaluated on the nodes of a fixed grid, while each particle has its current position and velocity individually tracked.
+Moreover, two different methods of simulating fluid flow are employed: direct numerical simulations (DNS) and large-eddy simulations (LES), both within the base framework of the pseudo-spectral method.
+Finally, beyond conceptual and numerical issues, such multiphase systems prove difficult to be effectively implemented for a massively parallel computing environments (supercomputers) and it will be addressed in the last section.
+
+
+\section{Fluid Flow Simulation with Pseudo-Spectral Method}
+\label{sc:ch1.pspec}
+
+The time evolution of turbulent fluid flow for simulations presented here is performed on the three-dimensional uniform cubical mesh with $N$ equally spaced grid points in each spatial dimension (see Figure \ref{fig:dns-les-grids}).
+For this study, the domain size (for DNS) was set to $N=256$, for the total of $256^3 \approx 16.8$ million grid points.
+The values of three-dimensional fluid velocity field $\mathbf{U}(\mathbf{x}, t)$ are evaluated at each time step and spatial grid point according to time-dependent Navier-Stokes equations for incompressible flows, as presented below in rotational form
+\begin{equation}
+  \left\{
+  \begin{array}{ll}
+  \frac{\partial \mathbf{U}}{\partial t} = - \mathbf{U} \times \boldsymbol{\omega} - \nabla \left( \frac{P}{\rho} + \frac{1}{2} \mathbf{U}^2 \right) + \nu \nabla^{2} \mathbf{U} + \mathbf{f} + \mathbf{f}^{(p)}\\
+  \nabla \cdot \mathbf{U} = 0
+  \end{array}
+  \right.
+  \label{eqn:n-s}
+\end{equation}
+where: $\boldsymbol{\omega} = \nabla \times \mathbf{U}$ denotes vorticity, $P$ -- pressure, $\rho$ -- fluid density, and $\nu$ -- kinematic viscosity of the fluid.
+Other contributions come from large-scale force, $\mathbf{f}$, used to achieve and maintain the statistically stationary state of homogeneous isotropic turbulence, together with the cumulative force exerted by particles on fluid per unit mass, $\mathbf{f}^{(p)}$, which is non-zero for simulations under two-way momentum coupling (TWC) where effects of particles on the fluid flow are considered (see Section \ref{sc:ch1.part}).
+Due to idealised nature of considered system, we may assume periodic boundary conditions in all three spatial directions.
+
+The numerical integration of the Navier-Stokes equations is performed using the -spectral method which is well-established for such simulations.
+It was first introduced by \textcite{Orszag1972} and later developed with parallel execution in mind and for application to particle-laden flows (e.g. see \textcite{Wang1993,Ayala2014,Parishani2015}).
+It involves transformations of the velocity field between its representations in physical space, $\textbf{U}(\textbf{x}, t)$, and spectral (Fourier) space, $\hat{\textbf{U}}(\textbf{k}, t)$, in order to perform some operations in the space that is most favourable.
+Detailed description of that method may be found in Appendix \ref{app:psm}.
+Note, that performing Fourier transforms (implemented as FFT) is the most computationally demanding part of the method.
+In the version of pseudo-spectral method used here, every iteration requires three 3D FFTs (1 forward and 2 inverse) for each component of the considered vector quantity and they dominate theoretical time complexity of the method, which is of order $N^3 \log N^3$ (per time step).
+
+In the context of this study, pseudo-spectral method proves to be particularly effective method.
+Due to its use of spectral space and Fourier transforms it allows to easily incorporate large-scale forcing required to maintain homogeneous isotropic turbulence.
+For the same reason, it is also well-suited to be used with LES method, especially in a form that is proposed in this study (see Section \ref{sc:ch1.les}), since velocity field filtering is defined in terms of convolution operation that becomes trivial to apply in Fourier space.
+Moreover, Fourier transforms that are repeatedly applied to fluid velocity field are consistent with periodic boundary conditions.
+Also, even though the velocity field is mainly integrated in the spectral space, it is also transferred back to the physical space (as opposed to purely spectral methods) and can be further used to calculate interactions between fluid flow and particles localised by their physical coordinates.
+Finally, pseudo-spectral method is known for its stability (if Courant-Friedrichs-Lewy number does not exceed 0.3) and superior computational accuracy for homogeneous isotropic turbulence \parencite{Peng2009}.
+On the other hand, frequent use of Fourier transforms makes it difficult to be effectively implemented for massively parallel execution, as such operations require global access to data across computational subdomains.
+Such overheads for data transfer between processes rapidly increase with grid size, therefore it is important to find methods of reducing grid sizes as pseudo-spectral method does not seem to scale well performance-wise beyond grids of size $N=1024$.
+
+\medskip
+
+The context of simulations studied here requires steady homogeneous isotropic turbulence to be maintained throughout the entire computation.
+For that reason energy must be provided to the system in an adequate manner to make up for the losses due to dissipation inherent in  turbulent processes and sustain statistically stationary flow that exhibits desired characteristics.
+Two main forcing schemes employed for that purpose are referred to as deterministic \parencite{Sullivan1994} and stochastic \parencite{Eswaran1988}. 
+The effects of using both schemes on particle statistics (in OWC context only) were studied in \textcite{Rosa2011,Rosa2013,Rosa2015,Parishani2015}.
+Slightly increased particle clustering and collision kernel values were observed with deterministic scheme, yet these discrepancies were deemed to be negligible, at least for the water droplets with radius smaller than $30$~$\upmu\text{m}$.
+Also, most discrepancies attributed to the choice of forcing scheme manifest when simulation time scale is correlated with forcing, which is partly alleviated by using time step, $\Delta t$, that is relatively small with respect to Kolmogorov time scale of turbulence, $\tau_k$, as prescribed in \textcite{Rosa2015} (here, $\Delta t / \tau_k \sim 10^{-2}$).
+Deterministic scheme, however, if properly parameterised, allows to achieve higher Reynolds numbers, $R_{\lambda}$, than by using stochastic forcing and this difference is important in this study.
+Hence, simulations performed here use only deterministic forcing scheme.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=10cm]{figures/1-01_forcing.pdf}
+\caption{
+The basic idea of deterministic forcing scheme: energy is supplied on large scales by fixing it for small wavenumbers (bold line), then it is transferred following Kolmogorov energy cascade ($E(k) \propto k^{-5/3}$) in inertial subrange, to finally reach smallest dissipative eddies represented by largest resolved wavenumbers (when $k_{\max} \eta \sim 1 = 10^0$, diverging dashed lines) that have largest influence on measured particle statistics at contact distances.
+Both axes are using standard normalisations (see Section \ref{ssc:ch2.flow.spec}) and logarithmic scale, that makes $k^{-5/3}$ curves appear as straight lines.}
+\label{fig:forcing}
+\end{figure}
+
+The basic idea behind deterministic forcing scheme, as laid out in \textcite{Sullivan1994}, is to set energy associated with largest eddies---or, equivalently, with lowest wavenumbers in the spectral space---to predetermined values in every time step.
+In order not to affect the entire flow this is done only for very few wavenumbers ($|k| \in \{ 1, 2 \}$ in this study).
+Then, due to energy cascade that characterises inertial scales of turbulence, the energy injected at low wavenumbers is transferred to the higher ones allowing to achieve statistically stationary state with desired characteristics of homogeneous isotropic turbulence (see Figure \ref{fig:forcing}).
+It is accomplished by balancing large-scale energy input provided by the forcing term and energy depletion due to viscous dissipation at small scales. 
+In case of this study, the contribution from the deterministic forcing, $\hat{\mathbf{f}}$, is included in Navier-Stokes equations in spectral space (see Equation \ref{eqn:mom-spec} in Appendix A, that is a Fourier-transformed version of Equations \ref{eqn:n-s}).
+Here, following the setup used in \textcite[p. 6]{Rosa2011}, the values for 3D shells associated with two lowest wavenumbers ($0.5 < |\textbf{k}| < 1.5$ and $1.5 < |\textbf{k}| < 2.5$) are set to $0.555440$ and $0.159843$ (following Kolmogorov's $E(k) \propto k^{-5/3}$ spectrum), respectively.
+For the remaining wavenumbers, $\hat{\mathbf{f}} = 0$, thus any smaller scales are not directly affected by forcing term.
+
+\section{Large-Eddy Simulations}
+\label{sc:ch1.les}
+
+The pseudo-spectral method, as described above, is used in DNS to directly calculate the velocity field of turbulent flow for all grid nodes.
+Despite important advantages, this method faces huge challenges in implementation for massively parallel execution \parencite{Onishi2013}. 
+Moreover, when applied to DNS it faces problematic limitations in computational performance and scalability. 
+Therefore an alternative approach is proposed, so called large-eddy simulation (LES). 
+The main goal is to reduce the size of computational grid without losing ability to model systems with similar range of turbulent scales, as measured by Taylor microscale Reynolds number, $R_{\lambda}$.
+This is achieved by directly resolving turbulent flow only for large and intermediate scales and replacing direct resolution of small-scale turbulence (as it is done in DNS) with one of the proposed models of turbulence, referred to as subgrid-scale (SGS) model.
+Since we are replacing direct resolution with parameterisation, it is expected that the fidelity of results obtained using LES (when compared with DNS) may be diminished and they may be highly sensitive to the appropriate choice of the subgrid-scale model.
+On the other hand, this allows a significant reduction in the size of used grid and, consequently, either increase computational performance of current simulations or enable new ones that achieve much higher $R_{\lambda}$.
+This is possible because large part of computational effort in DNS is dedicated to resolving smallest turbulent scales \parencite[p. 558]{Pope2000}.
+In case of this study, we use $N=64$ for LES and $N=256$ for DNS, thus the total number of grid nodes where fluid velocity field is directly resolved is reduced by the factor of $64$ (while still achieving comparable values of $R_{\lambda}$).
+Conceptually, we may consider that each LES cell encompasses $4^3=64$ DNS cells where small-scale variations in velocity field would be directly resolved by integrating Navier-Stokes equations (see Figure \ref{fig:dns-les-grids}).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=17cm]{figures/1-02_dns-les-grids.pdf}
+\caption{
+Conceptual juxtaposition of computational grids for DNS and LES.
+In LES, the subgrid-scale modelling parameterises small-scale turbulence that is directly resolved by $4 \times 4 \times 4$ block of cells in DNS.
+}
+\label{fig:dns-les-grids}
+\end{figure}
+
+In this study, that may be considered the continuation of \textcite{Rosa2017}, a similar setup for LES method is employed \parencite[based on earlier work by][]{Jin2010}.
+In particular, the closure of the subgrid term is based on the concept of the spectral-eddy viscosity, $\nu_{e}$.
+In spectral space, thefiltered velocity field $\hat{\bar{\mathbf{U}}}(\mathbf{k}, t)$ is governed by the following momentum equation \parencite{Pope2000}
+\begin{equation}
+\left\lbrace \frac{\partial}{\partial t} + [\nu + \nu_{e}(k|k_{c})]k^{2} \right\rbrace \hat{\bar{\mathbf{U}}}(\mathbf{k}, t) = \mathbf{P}(\mathbf{k}) \mathcal{F}(\bar{\mathbf{U}} \times \bar{\boldsymbol{\omega}}) + \hat{\mathbf{f}}(\mathbf{k}, t) ,
+\label{eqn:les}
+\end{equation}
+where $\mathbf{P} \equiv \left\{ \mathbf{P}_{ij} \right\}$ is the projection tensor (see Equation \ref{eqn:proj-tensor}) and $\mathcal{F}$ -- Fourier transform.
+By $k_{c}$ we denote cutoff wavenumber for filtering and its value is set using the same formula as maximal resolved wavenumber, $k_{\max}$, in DNS, i.e. $k_c = \left\lfloor (N - 3) / 2 \right\rfloor$ (for $N=64$, we have $k_c = 30$).
+In this method of modelling turbulence a sharp spectral filter is used to separate filtered (resolved) and residual (modelled) velocity fields which are strictly separated from each other in the spectral space with $| \mathbf{k} | = k_c$ as the boundary.
+Hence, modelled modes for $| \mathbf{k} | > k_c$ have no bearing on turbulence model for larger wavenumbers and all necessary information on filtered velocity field $\mathbf{\hat{\bar{U}}}(\mathbf{k}, t)$ is contained in wavenumbers smaller than $k_c$.
+Conversely, filtered velocity field contains no information on residual (small-scale) motions, thus they have to be entirely modelled \parencite[p. 615]{Pope2000}.
+
+In Equation \ref{eqn:les}, the term $\nu_{e}(k|k_{c})k^{2} \hat{\bar{\mathbf{U}}}(\mathbf{k}, t)$ represents the specific subgrid-scale model that is used for parameterisation of small-scale turbulence.
+Here, following \textcite{Rosa2017}, a standard formula for the spectral eddy viscosity is used \parencite[see][]{Chollet1981}.
+In particular, the eddy viscosity is given by
+\begin{equation}
+\nu_{e}(k|k_{c}) = \nu_{e}^{+}(k|k_{c}) \sqrt{\frac{E(k_{c})}{k_c}} ,
+\label{eqn:sgs-1}
+\end{equation}
+where total spectral energy for threshold wavenumber, $E(k_c)$, is dynamically evaluated at each time step, while the remaining term depends on $k$ and is defined as follows
+\begin{equation}
+\nu_{e}^{+}(k|k_{c}) = C_{K}^{-3/2} [ 0.441 + 15.2 \exp( -3.03 k_{c} / k) ] ,
+\label{eqn:sgs-2}
+\end{equation}
+where $C_{K}$ is the model constant (here, we set $C_{K} = 2.5$).
+
+\medskip
+
+LES is a well-established method in simulation of turbulent flows in many fields of research, and recently it is gaining more and more recognition as a tool for resolving carrier fluid flow in particle-laden simulations.
+The main issue with LES, i.e. the unavailability of turbulent velocity field for small dissipative scales, is not a huge concern for some experiments, mainly whene single-particle statistics are concerned, such as one-particle dispersion coefficient \parencite{Yang2008}.
+Still, some single-particle statistics, such as average settling velocity, are affected by phenomena like preferential sweeping that depend on small-scale fluid motion, and thus are influenced by subgrid-scale modelling \parencite{Rosa2017,Tom2019}.
+Moreover, two-particle collision statistics are clearly influenced by small-scale velocity field that is missing in LES \parencite{Jin2010}.
+In most cases, studies show that elimination of directly resolved fine-scale turbulence may influence preferential concentration of inertial particles (in cases covered by this thesis it is usually reduced, but it may also be amplified, see \textcite{Fede2006} for more details).
+Several studies established that such dependence on small turbulent scales is most prominent when Stokes number, $St$, of the system is close to $1$ \parencite{Wang2000,Pozorski2009,Jin2010} and that is where most significant discrepancies between DNS and LES should manifest.
+In contrast to the particle concentration (as measured by the radial distribution function), other collision statistics, such as the radial relative velocity (see Section \ref{ssc:ch2.coll.rdfrrv}), are to some extent governed by particle interactions with large-scale eddies \parencite{Wang2000} and their accuracy should be much less affected in LES. 
+Determining the impact of LES parameterisation on such statistics is one of the main goals of this thesis.
+This overview, however, shows that establishing relations between particle statistics, the ranges of turbulent scales that affect them, and possible impact of filtering out contribution of small eddies on particle behaviour is a complex task.
+
+\medskip
+
+Note, that \textcite{Jin2010} and \textcite{Rosa2017} also consider intermediate method between DNS and LES that is referred to as either filtered DNS or LES \emph{a priori}.
+It uses the same size grid as DNS and directly resolves turbulent flow for all scales, including the smallest.
+Such velocity field, however, before it is used to calculate momentum transfer to particles (see Equation \ref{eqn:owc}) is filtered in spectral space by setting all values of $\hat{\mathbf{U}}(\mathbf{k}, t)$ to zero for large wavenumbers above filtering threshold (i.e. for $|\mathbf{k}| > k_c$).
+Hence, particles are affected by filtered flow without directly resolved small-scale turbulence, as in LES.
+On the other hand, the flow itself is evolved with the same resolution as in DNS, thus providing more precise evolution of the fluid velocity field.
+For the purpose of this study filtered DNS is not of great interest, since it requires grids as large as for DNS, hence it provides no viable improvement in method scalability and performance.
+   
+
+\section{Modelling Interactions between Fluid Flow and Particles}
+\label{sc:ch1.part}
+
+The population of particles contained within given system is modelled using Lagrangian approach, so that each (computational) particle is individually tracked.
+Hence, given total number of particles, $N_{\text{part}}$, $k$-th particle, where $k \in \{ 1, \ldots , N_{\text{part}} \}$ is characterised by its position -- $\mathbf{Y}^{(k)}(t)$, velocity -- $\mathbf{V}^{(k)}(t)$, and other relevant properties, such as physical radius -- $a^{(k)}$.
+In case of this study, not only radius of any single particle is constant throughout the entire simulation, but only \emph{monodisperse} systems are considered, i.e. systems where all particles have the same size (that is $a^{(k)} = a$ for all $k$).
+Note that since Lagrangian tracking is employed, particles may assume any positions within domain, not only at locations of grid points where values of fluid velocity field are directly available.
+For that reason, proper interpolation techniques must be used when interactions between two phases are taken into account.
+
+First, we consider advancement in time of velocity and position vectors of $k$-th particle affected by the carrier fluid with velocity field, $\mathbf{U}(\mathbf{x}, t)$.
+For systems with large enough ratio between particle and fluid density, such as atmospheric clouds, we may apply simplified equations of motion \parencite{Maxey1983}.
+For $k$-th particle we have
+\begin{equation}
+  \left\{
+  \begin{array}{ll}
+  \frac{d \mathbf{V}^{(k)}(t)}{d t} = - f (Re_p) \frac{ \mathbf{V}^{(k)}(t) - \mathbf{U}(\mathbf{Y}^{(k)}(t), t) }{\tau_{p}} + \mathbf{g} ,\\
+  \frac{d \mathbf{Y}^{(k)}(t)}{d t} = \mathbf{V}^{(k)}(t) ,
+  \end{array}
+  \right.
+  \label{eqn:owc}
+\end{equation}
+where $f$ is the drag correction factor (in this study $f = 1$), $Re_p = (2 a \rho V_{\text{rel}}) / \mu $ -- particle Reynolds number, $V_{\text{rel}}$ -- particle--fluid relative velocity, $\tau_{p} = (2 \rho_{p} a^{2}) / (9 \mu)$ -- Stokes inertial response time of a particle, $\rho_{p}$ -- particle density, $\mu$ -- dynamic viscosity of the fluid, and $\rho$ -- density of the fluid.
+These equations, as stated before, hold when $\rho_p \gg \rho$ (in case of water droplets in air, $\rho_p / \rho \approx 10^3$). 
+The gravitational acceleration is given as $\mathbf{g}$, which may be either zero (for simulations without gravity), or set to $980.67 \, \text{cm} / \text{s}^{2}$ and pointing vertically downwards. 
+Furthermore, expression $\mathbf{U}(\mathbf{Y}^{(k)}(t), t)$ denotes contribution from the velocity field of the carrier fluid in the current location of $k$-th particle and it is calculated using six-point Lagrangian interpolation in each spatial direction \parencite{Ayala2014}.
+Effects due to the finite size of physical, spherical particles (as opposed to idealised point-particle representation) may be neglected, since considered range of water droplets radii ($20$--$60$~$\upmu\text{m}$) makes them significantly smaller than the Kolmogorov length scale of the turbulence, $\eta$. 
+Equations \ref{eqn:owc} are integrated using fourth-order Adams-Moulton and fourth-order Adams-Bashforth methods, respectively.
+
+The procedure described above incorporates calculation of the particle motion, as well as the influence of the carrier fluid on particles due to momentum transfer.
+When simulations are limited to above description of fluid-particle interactions they are said to involve one-way momentum coupling (OWC).
+These simulations require less computational resources and have been shown to effectively model dilute systems.
+In general, we use particle mass loading, $\Phi_{m}$, as the global measure of relative amount of particles in the system.
+It is defined as the ratio of total mass of particles to total mass of carrier fluid contained in the system, i.e.:
+\begin{equation}
+\Phi_m = \Phi_V \frac{\rho_p}{\rho} = \frac{(4/3) \pi a^3 N_{\text{part}}}{L^3} \frac{\rho_p}{\rho} ,
+\label{eqn:phim}
+\end{equation}
+where $L$ denotes the side-length of simulation domain.
+Here, $\Phi_V$ denotes the particle volume fraction, which may be used as an alternative measure of amount of particles in the system.
+When particle content becomes larger (approximately, for $\Phi_m > 0.1$) OWC approach becomes insufficient and other interactions should be considered as well.
+Promising strategy, not discussed further in this study, is to account for interactions between particles through disturbance field that models aerodynamic interactions between particles, as in Hybrid DNS method \parencite[see e.g.][]{Ayala2014}.
+Another remedy is to account for the transfer of momentum in the other way as well, i.e. from particles to the carrier fluid.
+Such approach not only allows to study influence of particles on the fluid flow characteristics and turbulence modulation, but also, indirectly, provides a limited way to include interactions between particles that are mediated by the fluid flow disturbed by the presence of nearby, slowly approaching particles.
+These simulations are said to be performed under two-way momentum coupling (TWC).
+
+In TWC approach, we assume that cumulative force per unit mass exerted by particles on the fluid, denoted by $\mathbf{f}^{(p)}$ (see Equation \ref{eqn:n-s}), is non-zero.
+Such contribution may be expressed as follows \parencite{Bosse2006,Monchaux2017,Rosa2022}
+\begin{equation}
+\mathbf{f}^{(p)}(\mathbf{x}, t) = - \frac{M}{\rho_{p}} \sum_{k=1}^{N_{\text{part}}} m^{(k)}_{p} \left( \frac{ \mathbf{U}(\mathbf{Y}^{(k)}(t), t) - \mathbf{V}^{(k)}(t) }{\tau_{p}} \right) \delta \left( \mathbf{x} - \mathbf{Y}^{(k)}(t) \right) ,
+\label{eqn:twc-th}
+\end{equation}
+where most of the notation follows that from Equation \ref{eqn:owc}, except $m^{(k)}_{p}$ which denotes individual mass of $k$-th particle.
+Moreover, $M$ is the weighting (super-particle) factor, discussed later in this section.
+This continuous description involves summation of contributions from all particles (terms that, according to Newton's third law, are equal in magnitude and opposite in direction to terms in Equation \ref{eqn:owc}) and localised in given spatial point $\mathbf{x}$ with Dirac delta distribution.
+In practice, we need a convenient way to calculate $\mathbf{f}^{(p)}$ for positions $\mathbf{x}$ at grid points without need to iterate over all particles.
+Due to mismatch between actual particle positions and discrete locations of grid points we use mollified Dirac delta, so that strict particle locality is relaxed and their contributions may be projected onto adjacent grid nodes.
+Thus, Equation \ref{eqn:twc-th} becomes
+\begin{equation}
+\mathbf{f}^{(p)}(\mathbf{x}, t) = - \phi_{m}(\mathbf{x}, t) \left( \frac{ \mathbf{U}(\mathbf{x}, t) - \mathbf{V}_{E}(\mathbf{x}, t)}{\tau_{p}} \right) ,
+\label{eqn:twc-px}
+\end{equation}  
+where $\phi_{m}$ is local mass loading. 
+The term $\mathbf{V}_{E}(\mathbf{x}, t)$, is referred to as Eulerian particle velocity at location $\mathbf{x}$, and may be computed as follows:
+\begin{equation}
+\mathbf{V}_{E}(\mathbf{x}, t) = \sum_{k=1}^{N_{\text{part}}} \mathbf{V}^{(k)}(t) \, \sigma(|| \mathbf{x} - \mathbf{Y}^{(k)}(t) ||) ,
+\label{eqn:twc-ve}
+\end{equation}
+where $\sigma$ is the interpolation kernel used to determine effect of given particle, based on its location, $\mathbf{Y}^{(k)}(t)$, onto grid node located at $\mathbf{x}$.
+There are several choices of such kernels and their practical implementations \parencite{Garg2007}, but in this study the projection onto neighbouring nodes (PNN) is used exclusively.
+Instead of summing all particle forces around a node, particle force contribution is projected onto eight neighbouring nodes based on some weighing scheme.
+Such scheme, in general, is a standard bi- or tri-linear function that depends on separation distance between particle and grid node.
+Here, in particular, we use calculations based on cell volume partition (see Figure \ref{fig:pnn}) introduced in \textcite{Squires1990}.
+This interpolation procedure is justified when influence of particles on the fluid is indeed highly localised and limited to the closest neighbouring nodes.
+In practice, this takes form of the requirement that size (radius, $a$) of a particle must be smaller than both spatial grid spacing, $\Delta x$ and smallest resolved turbulent scales as measured by Kolmogorov length scale, $\eta$.
+Both conditions are satisfied for all simulations in this study (see Section \ref{ssc:ch2.flow.part}).
+
+Note, as well, that in systems under TWC a mean flow must appear due to the net influence of all particles on the fluid (especially if gravity is concerned)
+That violates periodicity condition and leads to instability of computations.
+For that reason, at every time step, the Fourier mode corresponding to mean flow (i.e. for $|\mathbf{k}| = 0$) is set to zero, which is equivalent to applying a pressure gradient countering the mean flow and not affecting the validity of statistical results.
+Another numerical artefact of TWC is the indirect effect of $\textbf{f}^{(p)}$ on the continuity equation that may cause resulting velocity field to be not divergence-free.
+This issue was addressed in \textcite{Rosa2020} and it turns out that this effect is not significant in simulations performed here, since the volume fraction of particles compared to the fluid is relatively small (at most of order $10^{-3}$).
+Moreover, computations involved in the pseudo-spectral method enforce constraint from continuity equation by projecting the velocity vector onto plane normal to 3D wavenumber $\mathbf{k}$ (which also eliminates direct dependence on pressure, see Appendix \ref{app:psm} for more details).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=8cm]{figures/1-03_pnn.pdf}
+\caption{
+Projection onto neighbouring nodes (PNN; simplified illustration for 2D case).
+The contribution of the particle momentum to the fluid momentum at a grid node depends on the separation distance.
+For example, the particle force may be projected onto neighbouring nodes using weights that are proportional to cell areas (or volumes in 3D case).
+Here, the fluid flow at grid node $1$ is affected by a fraction of the particle Stokes drag proportional to the area with marker $1$, and so on.
+Based on \textcite[Fig. 1 therein]{Garg2007}.}
+\label{fig:pnn}
+\end{figure}
+
+\medskip
+
+The total number of particles, $N_{\text{part}}$, is another parameter, besides grid size $N$, that mainly determines computational burden of simulations.
+In this study, highest number of individually tracked particles was $20$ million and for droplets with smaller radii that was still not sufficient to achieve higher values of the mass loading.
+Still, simulations with larger mass loading ($0.1 < \Phi_{m} < 1$) are necessary to clearly observe effects of two-way momentum coupling on measured statistics.
+For that reason, in some simulations, super-particle parameterisation was used to increase $\Phi_m$ without adding new computational particles \parencite{Elghobashi1994}.
+That parameterisation is applied by using weighting factor, $M$, in Equation \ref{eqn:twc-th}.
+When $M=1$ each computational particle represents exactly one dropletand no extra parameterisation is involved.
+For $M > 1$, however, every computational particle models a cluster of $M$ droplets (i.e. the super-particle) that is tracked together as a single point-particle with inflated mass by the factor of $M$.
+
+Such parameterisation was used in \textcite{Rosa2020} for similar reasons and it was observed that it does not significantly affect measured collision statistics as long as $M$ is not too large.
+Moreover, it was noted that these discrepancies are relatively small when mass loading is large, this is probably due to the stronger turbulence attenuation in simulations without gravity (turbulence is the main mechanism enforcing particle clustering).
+On the other hand, in simulations with gravity a larger mass loading results in the formation of new vortical structures which cause the decorrelation of particle motion and consequently a more uniform spatial distribution.
+More systematic analysis of the impact of this parameterisation was conducted in a recent study by \textcite{Rosa2022} where collision statistics from simulations with varying $M$ and fixed mass loading, $\Phi_m$, were analysed.
+The clear tendency for that parameterisation to overestimate the radial relative velocity and underestimate the radial distribution function was reported.
+For values of $M < 20$ the influence of super-particle parameterisation may be acceptable, but otherwise discrepancies rapidly cumulate and render obtained results applicable for only qualitative analysis at best (in some cases, for $M = 100$, values of RDF were halved, and for RRV inflated by the factor of $3$).
+Moreover, even larger discrepancies were observed in simulations with gravity. 
+
+Interestingly, some studies using more refined techniques of dealing with super-particles \parencite{Garg2009} have shown that errors arising from that parameterisation increase with refinement of the grid.
+This may be beneficial when considering LES method, as it works on much coarser grid than comparable DNS.
+Still, cumulative effects and possible interactions between these two parameterisations may be quite complex and hard to follow in a systematic and quantitative manner.
+
+
+
+\section{Notes on Implementation}
+\label{sc:ch1.impl}
+
+The effective implementation of methods presented above is necessarily intended for massively parallel computation environments (supercomputers) due to large grids and particle populations that are required to produce physically meaningful results.
+The solver code used in this study was long developed, tested, and improved upon to provide further capabilities \parencite[see~e.g.][]{Ayala2014,Parishani2015}, including modifications necessary to obtain results presented here.
+It is implemented using Message Passing Interface (MPI) to facilitate communication between several processes executing the code.
+The division of work is based on the concept of 2D domain decomposition where each process is handling all computations associated with one part (subdomain) of the entire computational domain.
+In this case, the domain is divided along two out of three spatial axes into ''columns'' with equal number of grid nodes (see Figure \ref{fig:2dd}).
+By default, two directions chosen for such decomposition are those orthogonal to the (vertical) direction of gravity, in order to minimise the number of particles crossing subdomain boundaries. 
+This strategy is relatively simple to implement and quite efficient, at least if we assume that distribution of particles between subdomains is close to uniform (this assumption will be further analysed in Section \ref{sc:ch3.perfp}).
+In this study, subdomains have dimensions $16 \times 16 \times N$ to provide large enough margin for convenient communication between processes.
+In particular, for DNS and its grid with $256^{3}$ nodes we have $16^{2} = 256$ subdomains, and for LES with $64^{3}$ grid nodes -- $4^{2} = 16$ subdomains.
+The number of processes used to execute solver code is equal to the number of subdomains used.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=10cm]{figures/1-04_2dd.pdf}
+\caption{
+Schematic representation of 2D domain decomposition.
+This image corresponds to the actual decomposition of $64^{3}$ grid used for LES.
+Entire domain is divided into $4 \times 4 = 16$ subdomains, each with $16 \times 16 \times 64$ nodes.
+}
+\label{fig:2dd}
+\end{figure}
+
+Exact steps that constitute each iteration of both DNS and LES method are summarised in Table \ref{tab:code-steps}.
+In general, entire code may be divided into parts that handle computations involving either fluid flow or particle motion, as well as parts used for data postprocessing (i.e. to calculate and output interesting statistics of fluid flow and particles).
+The heart of pseudo-spectral code is the efficient implementation of the fast Fourier transform, as every iteration requires performing 3D FFT three times.
+Parallel implementation of 3D FFT is used as proposed by \textcite{Ayala2013}.
+It is decomposed into three separate calls to 1D FFT procedures provided by \texttt{fftw} library together with an original procedure for data transposition.
+The choice of 2D domain decomposition was mainly driven by the fact that it was found to be optimal for such implementation of parallel 3D FFT.  
+It was chosen above 1D decomposition that was initially proposed by \textcite{Dmitruk2001}, since it heavily restricted number of parallel processes allowed to execute the code, and above 3D decomposition which introduced excessive costs of communication and data transfer between larger number of subdomains \parencite{Ayala2013}.   
+The architecture used to store particle data and transfer it between processes is a key part of the implementation, as detection of nearby particles is crucial for efficient calculation of two-point particle collision statistics.
+For that reason the concept of linked lists together with the cell-index method was employed according to \textcite[p. 149--152]{Allen1987}.
+In every run statistics of the fluid flow and particles statistics are gathered only after the entire system has reached the statistically stationary state, which is not earlier than after approximately $10 T_e$ \parencite{Rosa2017}, where $T_e$ is turnover time for largest resolved eddies.  
+
 
 
 \chapter{Physical Fidelity of DNS and LES Results}
