@@ -1,0 +1,52 @@
+
+%%% =================== %%%
+%%%      CHAPTER 2      %%%
+%%% =================== %%%
+
+% TABLE 2-01 - FLOW STATISTICS
+
+\begin{table}
+\centering
+\begin{tabular}{llll}
+ & & & \scriptsize{\textcite{Rosa2013}}  \\
+ & \textbf{DNS} & \textbf{LES*} & \textbf{DNS}  \\ \hline
+$N$ & $256$ & $64$ & $256$ \\
+$\Delta t \cdot 10^{4}$ & $9.0$ & $9.0$ & $9.0$  \\
+$\nu \cdot 10^{3}$ & $1.5$ & $1.5$ & $1.1$  \\
+$u'$ & $0.871 \pm 0.001 $ & $0.861 \pm 0.001 $ & $0.868 \pm 0.002 $ \\
+$\epsilon$ & $0.212 \pm 0.002 $ & $0.200 \pm 0.001$* & $0.200 \pm 0.003 $  \\
+$\eta \cdot 10^{2}$ & $1.125 \pm 0.003$ & $2.078 \pm 0.007$* & $0.903 \pm 0.037$  \\
+$\tau_{k} \cdot 10^{2}$ & $8.436 \pm 0.043$ & $15.755 \pm 0.122$* & $7.420 \pm 0.620$  \\
+$L_{s}$ & $1.462 \pm 0.003$ & $1.501 \pm 0.004$ & $1.496 \pm 0.005$  \\
+$\lambda \cdot 10$ & $2.851 \pm 0.011$ & $5.252 \pm 0.014$* & $2.494 \pm 0.015$  \\
+$T_{e}$ & $3.616 \pm 0.028$ & $3.697 \pm 0.025$* & $3.774 \pm 0.045$  \\
+$k_{\max} \eta$ & $1.423 \pm 0.004 $ & --- & $1.143 \pm 0.005 $  \\
+$R_{\lambda}$ & $165.91 \pm 0.51 $ & $165.01 \pm 0.11$* & $196.87 \pm 0.78 $            
+\end{tabular}
+\caption{Parameters and statistics, in spectral units, of background turbulent flows simulated in this study (first two columns) and from \textcite{Rosa2013} shown for results validation (third column). 
+All listed simulations used deterministic forcing scheme. \\ 
+* -- in LES, statistics marked with * are ``effective'', i.e. calculated using viscosity adjusted by subgrid-scale model; for more details see Appendix \ref{app:sgs}.}
+\label{tab:flow-stats}
+\end{table}
+
+
+% TABLE 2-01 - PARTICLE STATISTICS
+
+\begin{table}
+\centering
+\small
+\begin{tabular}{lrrrrrrrrr}
+$\mathbf{a}$ [$\upmu\text{m}$] & 20 & 25 & 30 & 35 & 40 & 45 & 50 & 55 & 60  \\ \hline
+$St$ & 0.254 & 0.396 & 0.571 & 0.777 & 1.015 & 1.284 & 1.585 & 1.918 & 2.283 \\
+$S_V$ & 1.789 & 2.790 & 4.018 & 5.468 & 7.143 & 9.040 & 11.160 & 13.504 & 16.071 \\
+$Fr$ & 0.81 & 3.08 & 9.21 & 23.23 & 51.76 & 104.93 & 197.44 & 349.77 & 589.54 \\
+$\eta / a$ & 29.60 & 23.69 & 19.73 & 16.91 & 14.80 & 13.16 & 11.84 & 10.76 & 9.87 \\
+$\Delta x_{\text{DNS}} / a$ & 64.58 & 51.67 & 43.06 & 36.90 & 32.29 & 28.70 & 25.83 & 23.48 & 21.53 \\
+$\Delta x_{\text{LES}} / a$ & 219.62 & 175.70 & 146.42 & 125.50 & 109.81 & 97.61 & 87.85 & 79.86 & 73.21 \\
+$\Delta t / \tau_p \times 10^2$ & 17.21 & 11.02 & 7.65 & 5.62 & 4.30 & 3.40 & 2.75 & 2.28 & 1.91 \\ \hline
+\end{tabular}
+\caption{Basic parameters for particle-laden flows for the range of particle radii (in $\upmu\text{m}$) that were used in this study.
+$S_V$ and $Fr$ are only applicable to simulations with gravity.
+Note, that values of $\Delta x / a$ ratio are listed separately for DNS and LES, since their spatial step $\Delta x$ differ significantly due to much smaller density of grid points in LES without changing domain size. }
+\label{tab:part-stats}
+\end{table}

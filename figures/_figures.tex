@@ -45,7 +45,7 @@ In LES, the subgrid-scale modelling parameterises small-scale turbulence that is
 
 % FIGURE 1-03 - PROJECTION ONTO NEIGHBOURING NODES
 
-\begin{figure}[h]
+\begin{figure}
 \centering
 \includegraphics[width=8cm]{figures/1-03_pnn.pdf}
 \caption{
@@ -59,7 +59,7 @@ Based on \textcite[Fig. 1 therein]{Garg2007}.}
 
 % FIGURE 1-04 - 2D DOMAIN DECOMPOSITION
 
-\begin{figure}[h]
+\begin{figure}
 \centering
 \includegraphics[width=10cm]{figures/1-04_2dd.pdf}
 \caption{
@@ -69,3 +69,177 @@ Entire domain is divided into $4 \times 4 = 16$ subdomains, each~with~$16 \times
 }
 \label{fig:2dd}
 \end{figure}
+
+
+
+%%% =================== %%%
+%%%      CHAPTER 2      %%%
+%%% =================== %%%
+
+% FIGURE 2-01 - TURBULENT FLOW ENERGY SPECTRA
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{figures/2-01_spec.pdf}
+\caption{
+The normalised energy spectra of background turbulent flows for both DNS and LES.
+Dashed line provides comparison with $k^{-5/3}$ curve of theoretical Kolmogorov spectrum (see Equation~\ref{eqn:kolm}) for inertial subrange.
+}
+\label{fig:spec}
+\end{figure}
+    
+% FIGURE 2-02 - TURBULENT FLOW DISSIPATION SPECTRA
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{figures/2-02_diss.pdf}
+\caption{
+The normalised energy dissipation spectra of background turbulent flows for both DNS and LES.
+Point where $D(k)$ is expected to be maximal (for $k \eta = 0.2$) is marked by dashed line. 
+}
+\label{fig:diss}
+\end{figure}
+
+% FIGURE 2-03 - ENERGY SPECTRA OF TURBULENT FLOWS MODULATED BY PARTICLES
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-03_modspec.pdf}
+\caption{
+The normalised energy spectra of turbulent flows with droplets of radii $40$~$\upmu\text{m}$, with and without gravity, as obtained using both DNS and LES with two-way momentum coupling and different particle mass loadings.
+Dashed lines represent spectra without turbulence modulation by particles (see Figure \ref{fig:spec}).
+For comparison (with DNS results only), see \textcite[Figure 4 therein]{Rosa2020}.
+}
+\label{fig:modspec}
+\end{figure}
+
+% FIGURE 2-04 - DISSIPATION SPECTRA OF TURBULENT FLOWS MODULATED BY PARTICLES
+    
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-04_moddiss.pdf}
+\caption{
+The normalised energy dissipation spectra of turbulent flows with droplets of radii $40$~$\upmu\text{m}$, with and without gravity, as obtained using both DNS and LES performed under two-way momentum coupling with different particle mass loadings.
+Dashed lines represent dissipation spectra without turbulence modulation by particles (see Figure \ref{fig:diss}).
+For comparison (DNS only), see Figure 5 in \textcite{Rosa2020}.
+}
+\label{fig:moddiss}
+\end{figure}
+
+% FIGURE 2-05 - PARAMETERS OF TURBULENT FLOWS MODULATED BY PARTICLES
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-05_modstat.pdf}
+\caption{
+Time averaged statistics of turbulent flows as obtained by DNS and LES under two-way momentum coupling, normalised by the corresponding statistics from simulations without turbulence modulation (OWC).
+Plotted statistics include: the effective energy dissipation rate, $\epsilon_{\text{eff}}$ (top figures for DNS and LES, respectively), and the RMS fluctuating velocity, $u'$ (bottom figures, likewise).
+WG denotes simulations with gravity (continuous lines); NG -- without gravity (dashed lines).
+For comparison (DNS only), see Figure 11 in \textcite{Rosa2020}.
+}
+\label{fig:modstat}
+\end{figure}
+
+% FIGURE 2-06 - RDF AND RRV FOR OWC SIMULATIONS
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-06_owcrdfrrv.pdf}
+\caption{
+The values of the radial distribution function (RDF, left) and the radial relative velocity (RRV, right) at contact distance for simulations under one-way momentum coupling.
+Results include data from both DNS and LES simulations, with (WG) and without (NG) gravity.
+}
+\label{fig:owcrdfrrv}
+\end{figure}
+
+% FIGURE 2-07 - COLLISON KERNELS FOR OWC SIMULATIONS
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=10cm]{figures/2-07_owcgamma.pdf}
+\caption{
+The values of both dynamic and kinematic collision kernels for simulations under one-way momentum coupling.
+Results include data from both DNS and LES simulations, with (WG) and without (NG) gravity.
+Continuous lines represent values for dynamic kernel ($\Gamma_{11}^D$) and dashed ones (almost overlaid on continuous ones due to their close agreement) -- for kinematic kernel ($\Gamma_{11}^K$). 
+}
+\label{fig:owcgamma}
+\end{figure}
+
+% FIGURE 2-08 - RDF FOR TWC SIMULATIONS
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figuress/2-08_twcrdf.pdf}
+\caption{
+The values of radial distribution function (RDF) at contact distance for simulations under two-way momentum coupling using both DNS and LES.
+Top plots show relation of RDF on particle radius for several fixed values of mass loading, $\Phi_m$ (also compared with results for OWC).
+Bottom ones show the dependence of RDF on the number of particles (in millions) for particles with radii $30$~$\upmu\text{m}$ and $40$~$\upmu\text{m}$.
+Plots on the left show results without effects of gravity (NG), and those on the right consider settling particles (WG).
+}
+\label{fig:twcrdf}
+\end{figure}
+
+% FIGURE 2-09 - RDF FOR TWC SIMULATIONS WITH LARGER MASS LOADINGS
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-09_twcrdfext.pdf}
+\caption{
+The values of RDF for wider range of mass loadings.
+It may be considered as an extension of bottom plots from Figure \ref{fig:twcrdf} where scope was limited to $20$ million particles (${\Phi_m \approx 0.1}$).
+Here, results include wider range of mass loadings where TWC should be most prominent (i.e. around $0.1$ to $1$) and where it may even not be sufficient (i.e. four-way coupling regime for $\Phi_m > 1$).
+Continuous lines represent simulations without super-particle parameterisation ($M=1$), while dashed ones show where super-particle parameterisation was necessary to obtain larger mass loadings.
+For precise information on values of $M$ for each simulation, see Appendix \ref{app:spp}. 
+}
+\label{fig:twcrdfext}
+\end{figure}
+
+% FIGURE 2-10 - RRV FOR TWC SIMULATIONS
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-10_twcrrv.pdf}
+\caption{
+The values of radial relative velocity (RRV) at contact distance for simulations under two-way momentum coupling using both DNS and LES.
+Consistent with Figure \ref{fig:twcrdf}.
+}
+\label{fig:twcrrv}
+\end{figure}
+
+% FIGURE 2-11 - RRV FOR TWC SIMULATIONS WITH LARGER MASS LOADINGS
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-11_twcrrvext.pdf}
+\caption{
+The values of RRV for wider range of mass loadings.
+Consistent with Figure \ref{fig:twcrdfext}.
+}
+\label{fig:twcrrvext}
+\end{figure}
+
+% FIGURE 2-12 - DYNAMIC COLLISION KERNELS FOR TWC SIMULATIONS
+
+\begin{figure}
+\centering
+\includegraphics[width=13.5cm]{figures/2-12_twcgamma.pdf}
+\caption{
+The values of dynamic collision kernel ($\Gamma_{11}^D$) for simulations under two-way momentum coupling using both DNS and LES.
+Consistent with Figure \ref{fig:twcrdf}.
+}
+\label{fig:twcgamma}
+\end{figure}
+
+% FIGURE 2-13 - DYNAMIC COLLISION KERNELS FOR SIMULATIONS WITH LARGER MASS LOADINGS
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=13.5cm]{figures/2-13_twcgammaext.pdf}
+\caption{
+The values of dynamic collision kernel for wider range of mass loadings.
+Consistent with Figure \ref{fig:twcrdfext}.
+}
+\label{fig:twcgammaext}
+\end{figure}
+    
+
