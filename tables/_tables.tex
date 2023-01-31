@@ -3,6 +3,7 @@
 %%%      CHAPTER 2      %%%
 %%% =================== %%%
 
+
 % TABLE 2-01 - FLOW STATISTICS
 
 \begin{table}
@@ -49,4 +50,244 @@ $\Delta t / \tau_p \times 10^2$ & 17.21 & 11.02 & 7.65 & 5.62 & 4.30 & 3.40 & 2.
 $S_V$ and $Fr$ are only applicable to simulations with gravity.
 Note, that values of $\Delta x / a$ ratio are listed separately for DNS and LES, since their spatial step $\Delta x$ differ significantly due to much smaller density of grid points in LES without changing domain size. }
 \label{tab:part-stats}
+\end{table}
+
+
+
+%%% =================== %%%
+%%%      CHAPTER 3      %%%
+%%% =================== %%%
+
+
+% TABLE 3-01 - SIMULATION EXECUTION PARAMETERS
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{lrccrcrr}
+ & $N$ & $N^3$ & Subdomain size & $\#\text{SD}$ & $N / \text{SD}$ & $N_{\text{proc}}$ & $\# \text{Nodes}$ \\ \hline
+\textbf{DNS} & $256$ & $2^{24} \; (\sim 16.8 \, \text{M})$ & $16 \times 16 \times 256$ & $256$ & $2^{16}$ & $256$ & $11$ \\
+\textbf{LES} & $64$ & $2^{18} \; (\sim 262 \, \text{k})$ & $8 \times 8 \times 64$ & $64$ & $2^{12}$ & $64$ & $3$ \\   
+\end{tabular}
+\caption{Standard execution parameters for DNS and LES code: $N$ -- number of grid nodes (in one spatial direction); $N^3$ -- total number of grid nodes; $\#\text{SD}$ -- number of subdomains; $N / \text{SD}$ -- number of grid nodes per subdomain; $N_{\text{proc}}$ -- number of parallel processes used ($= \#\text{SD}$); $\# \text{Nodes}$ -- number of \emph{Okeanos} supercomputer nodes (24 CPU cores per node) to fully saturate maximal supported number of processes.
+}
+\label{tab:perfs-params}
+\end{table}
+
+
+% TABLE 3-02 - OUTLINE OF SINGLE TIME STEP OF SIMULATION
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{p{10mm}p{75mm}p{25mm}p{27mm}}
+\textbf{No.} \newline (Cat.) & \textbf{Name} \newline \emph{Description} & \textbf{Interdomain \newline communication} & \textbf{Notes} \\ \hline \hline
+\rowcolor[RGB]{190,240,220} \textbf{1} \newline (F) & 
+\textbf{Transform $\mathbf{\hat{u}}$ and $\boldsymbol{\hat{\omega}}$ to physical space} \newline \emph{Uses inverse 3D FFT twice; first two steps of pseudo-spectral method procedure.} & FFT & Eqn. \ref{eqn:psproc-1} and \ref{eqn:psproc-2}. \\ 
+\rowcolor[RGB]{240,220,190} \textbf{2} \newline (P) & 
+\textbf{Calc. momentum transfer from fluid to particles} \newline \emph{Finds closest grid points to particles and calculates momentum transfer using six-point Lagrange interpolation scheme (OWC).} & Local & --- \\ 
+\rowcolor[RGB]{240,190,150} \textbf{3} \newline (P) &
+\textbf{Calc. momentum transfer from particles to fluid} \newline \emph{Uses PNN kernel to apply momentum transfer projected from particles onto fluid at neighbouring grid points (TWC).} & Local & Eqn. \ref{eqn:twc-px}. \newline \textbf{(TWC only)} \\ 
+\rowcolor[RGB]{240,220,190} \textbf{4} \newline (P) &
+\textbf{Calc. new particle velocities and positions} \newline \emph{Integrates equations of motion for particles to obtain their new velocities and positions; updates data structures used to keep track of neighbouring particles.} & Local & Eqn. \ref{eqn:owc}. \\ 
+\rowcolor[RGB]{240,240,170} \textbf{5} \newline (Pd) &
+\textbf{Calculate and write particle collision statistics} \newline \emph{Detects and counts particle collisions ($\Gamma^D_{11}$) and relative particle-pair data within radial shells necessary to compute RDF and RRV.}  & Global (only to \newline write data), Local & Sec. \ref{ssc:ch2.coll.rdfrrv} and \ref{ssc:ch2.coll.gamma}; \newline every step;  for steps \newline $> 30 000$ (after \newline system relaxation). \\ 
+\rowcolor[RGB]{240,220,190} \textbf{6} \newline (P) &
+\textbf{Update particle velocities and positions} \newline \emph{Changes the state of particles as calculated in step 4; transfers data for particles crossing subdomain boundaries.} & Global, Local & --- \\ 
+\rowcolor[RGB]{150,240,150} \textbf{7} \newline (Fd) &
+\textbf{Calculate and write flow statistics and spectra} \newline \emph{Obtains and stores energy and dissipation spectra; calculates other base and derived flow statistics ($u'$ and $\epsilon$).} & Global, FFT, Local & Sec. \ref{ssc:ch2.flow.bstat} and \ref{ssc:ch2.flow.spec}; \newline every 50 steps*. \\ 
+\rowcolor[RGB]{190,240,220} \textbf{8} \newline (F) & 
+\textbf{Transform $\mathbf{u} \times \boldsymbol{\omega}$ to spectral space} \newline \emph{Uses 3D FFT to perform third step of pseudo-spectral method procedure; performs post-transform dealiasing.} & FFT & Eqn. \ref{eqn:psproc-3}. \\
+\rowcolor[RGB]{150,190,240} \textbf{9} \newline (F) & 
+\textbf{Calc. effective viscosity using subgrid-scale model} \newline \emph{Uses fluid energy spectrum and subgrid-scale model formulation to adjust kinematic viscosity with spectral-eddy viscosity, i.e. $\nu + \nu_e(k|k_c)$.} & Global & Eqn. \ref{eqn:sgs-1} and \ref{eqn:sgs-2}. \newline \textbf{(LES only)} \\ 
+\rowcolor[RGB]{190,240,220} \textbf{10} \newline (F) &
+\textbf{Integrate fluid flow equations} \newline \emph{Integrates 3D Navier-Stokes equation using Crank-Nicholson scheme (fourth step of pseudo-spectral method); incorporates deterministic forcing and other external forces; performs necessary dealiasing and symmetrisation.} & Global, Local & Eqn. \ref{eqn:psproc-4} \\ \hline \hline
+\end{tabular}
+\caption{
+The outline of a single time step of the pseudo-spectral solver used in this study that was divided into ten stages for readability.
+Labels in the first column indicate whether given stage is related to solving fluid flow (``F'') or particles (``P''), and whether it is concerned with gathering and postprocessing data (``d'').
+The third column characterises the level of interdomain communication required at given stage (see text for details). \\
+* -- for simulations without particles flow statistics are gathered more frequently (here, every 20 steps).
+}
+\label{tab:code-steps}
+\end{table}
+
+
+% TABLE 3-03 - SIMPLE TIMINGS FOR LES FOR DIFFERENT CPU NODE COUNT
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{lrrrr}
+\textbf{LES} & \multicolumn{4}{c}{Wall-clock time per step [ms]} \\
+& No particles & OWC, $N_{\text{part}} = 2 \text{M}$ & TWC, $N_{\text{part}} = 2 \text{M}$ & TWC, $N_{\text{part}} = 5 \text{M}$ \\ \hline
+1 node utilised             & $112.90 \pm 22.71$ & $1250.07 \pm 81.70$ & $1281.39 \pm 80.65$ & $6407.73 \pm 303.50$ \\
+2 node utilised             & $2.22 \pm 0.33$ & $462.62 \pm 30.51$ & $488.70 \pm 35.98$ & $3348.79 \pm 118.54$ \\
+3 node utilised (saturated) & $1.77 \pm 0.34$ & $249.76 \pm 17.41$ & $260.68 \pm 19.34$ & $1914.37 \pm 90.85$ \\
+\end{tabular}
+\caption{Time-averaged wall-clock times per step for LES, depending on the limited number of computational nodes on \emph{Okeanos} supercomputer (24 CPU cores per node).
+Consistent with Figure \ref{fig:pfspfn}.
+}
+\label{tab:perfs-pfnles}
+\end{table}
+
+
+% TABLE 3-04 - SIMPLE TIMINGS DEPENDING ON SUBDOMAIN SIZES
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{lrrrrrr}
+\multicolumn{7}{c}{\textbf{Wall-clock time per step [ms]}} \\
+ & & No particles & OWC & TWC & TWC & TWC \\ 
+Subdomain size & $N / \text{SD}$ &  & $N_{\text{part}} = 2 \text{M}$ & $N_{\text{part}} = 2 \text{M}$ & $N_{\text{part}} = 5 \text{M}$ & $N_{\text{part}} = 20 \text{M}$ \\ \hline
+    
+DNS, $8 \times 8$ & $2^{14}$ & $24.6 \pm 7.4$ & $39.2 \pm 8.1$ & $41.9 \pm 7.7$ & $60.0 \pm 11.0$ & $2015.2 \pm 29.4$ \\
+\textbf{DNS}, $\mathbf{16 \times 16}$ & $2^{16}$ & $58.3 \pm 10.2$ & $89.7 \pm 9.8$ & $97.6 \pm 9.4$ & $180.0 \pm 20.8$ & $872.5 \pm 76.2$ \\
+DNS, $32 \times 32$ & $2^{18}$ & $192.0 \pm 43.2$ & $310.6 \pm 45.0$ & $317.8 \pm 44.0$ & $551.8 \pm 45.9$ & $3046.2 \pm 139.4$ \\ \hline
+\textbf{LES}, $\mathbf{8 \times 8}$ & $2^{12}$ & $1.8 \pm 0.3$ & --- & $338.4 \pm 29.5$ & $2539.7 \pm 246.5$ & --- \\
+LES, $16 \times 16$ & $2^{14}$ & $4.1 \pm 0.5$ & $1359.4 \pm 49.1$ & $1425.9 \pm 52.4$ & $9142.4 \pm 290.8$ & --- \\ \hline \hline
+ & & & & & & \\
+\multicolumn{7}{c}{$\mathbf{(}$\textbf{WCT [s]} $\mathbf{\times N_{\text{proc}})}$ \textbf{per step}} \\
+ & & No particles & OWC & TWC & TWC & TWC \\ 
+Subdomain size & $N_{\text{proc}}$ &  & $N_{\text{part}} = 2 \text{M}$ & $N_{\text{part}} = 2 \text{M}$ & $N_{\text{part}} = 5 \text{M}$ & $N_{\text{part}} = 20 \text{M}$ \\ \hline
+    
+DNS, $8 \times 8$ & 1024 & $25.2 \pm 7.5$ & $40.01 \pm 8.2$ & $42.9 \pm 7.8$ & $61.4 \pm 11.3$ & $220.4 \pm 30.1$ \\
+\textbf{DNS}, $\mathbf{16 \times 16}$ & 256 & $14.9 \pm 2.6$ & $23.0 \pm 2.5$ & $25.0 \pm 2.4$ & $46.1 \pm 5.3$ & $223.4 \pm 19.5$ \\
+DNS, $32 \times 32$ & 64 & $12.3 \pm 2.8$ & $19.9 \pm 2.9$ & $20.3 \pm 2.8$ & $35.3 \pm 2.9$ & $195.0 \pm 8.9$ \\ \hline
+\textbf{LES}, $\mathbf{8 \times 8}$ & 64 & $0.113 \pm 0.022$ & --- & $21.7 \pm 1.9$ & $162.5 \pm 6.5$ & --- \\
+LES, $16 \times 16$ & 16 & $0.066 \pm 0.008$ & $21.8 \pm 0.8$ & $22.8 \pm 0.8$ & $146.3 \pm 4.7$ & --- \\ \hline \hline
+\end{tabular}
+\caption{Time-averaged wall-clock times per step by itself (top) and multiplied by the number of parallel processes used to execute code (bottom) for DNS and LES simulations with different sizes of computational subdomains.
+Entries in bold represent ``standard'' sizes used in this study (see Table \ref{tab:perfs-params}).
+}
+\label{tab:perfs-pfg}
+\end{table}
+
+
+% TABLE 3-05 - PROFILE DATA FOR PARTICLE-FREE SIMULATIONS
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{lcrrrrrr}
+& & \multicolumn{1}{c}{Stage 7} &  \multicolumn{1}{c}{Stage 8} & \multicolumn{1}{c}{Stage 9} & \multicolumn{1}{c}{Stage 10} &  \multicolumn{1}{c}{Stage 1} & \multicolumn{1}{c}{TOTAL} \\
+& & \multicolumn{1}{c}{Postprocessing} &  \multicolumn{1}{c}{FFT of $(\mathbf{u} \times \boldsymbol{\omega})$} &  \multicolumn{1}{c}{SGS model} &  \multicolumn{1}{c}{Flow eqns.} & \multicolumn{1}{c}{2x $\text{FFT}^{-1}$} & \\
+& $N$ & \multicolumn{1}{c}{$T_7$ [ms]} & \multicolumn{1}{c}{$T_8$ [ms]} & \multicolumn{1}{c}{$T_{\text{LES}}$ [ms]} & \multicolumn{1}{c}{$T_{10}$ [ms]} & \multicolumn{1}{c}{$T_1$ [ms]} & \multicolumn{1}{c}{$T_{\text{F}}$ [ms]} \\ \hline
+\textbf{DNS} & \textbf{256} & $2.179 \pm 9.571$ & $18.027 \pm 1.457$ & --- & $6.676 \pm 0.371$ & $30.826$ & $55.708 \pm 10.934$ \\
+LES & 256 & $2.193 \pm 9.633$ & $17.382 \pm 0.902$ & $1.501 \pm 0.265$ & $7.135 \pm 0.272$ & $31.768$ & $59.981 \pm 10.204$ \\
+\textbf{LES} & \textbf{64} & $0.067 \pm 0.291$ & $0.571 \pm 0.055$ & $0.052 \pm 0.007$ & $0.155 \pm 0.008$ & $0.964$ & $1.808 \pm 0.337$ \\
+\end{tabular}
+\caption{Performance profile for simulations without particles.
+Wall-clock time measurements for specific stages involved in fluid flow computations in standard DNS and LES (in bold; see Table \ref{tab:perfs-params}).
+Also includes results for LES performed with comparable grid size ($256$) and subdomain division to DNS used in this study.
+}
+\label{tab:pff-flow}
+\end{table}
+    
+
+
+%%% ==================== %%%
+%%%      APPENDIX B      %%%
+%%% ==================== %%%
+
+
+% TABLE B-01 - RAW AND EFFECTIVE FLOW STATISTICS FOR DIFFERENT SGS PARAMETER C_K 
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{llllllllllllll}
+$\mathbf{C_K}$ & \textbf{DNS}* & $0.50$ & $0.75$ & $1.00$ & $1.25$ & $1.50$ & $2.00$ & $\mathbf{2.50}$ & $3.00$ & $3.50$ & $4.50$ & $7.50$ & $10.00$ \\ \hline
+    
+$\bar{\nu}_{\text{SGS}} \cdot 10^3$ & --- & 0.31 & 0.46 & 0.60 & 0.72 & 0.84 & 1.07 & \textbf{1.24} & 1.38 & 1.54 & 1.78 & 2.17 & 2.35 \\
+$\nu_{\text{eff}}  \cdot 10^3$ & \textbf{1.50} & 1.81 & 1.96 & 2.10 & 2.22 & 2.34 & 2.57 & \textbf{2.74} & 2.88 & 3.04 & 3.28 & 3.67 & 3.85 \\
+    
+$u'$ & \textbf{0.87} & 0.85 & 0.86 & 0.86 & 0.86 & 0.86 & 0.86 & \textbf{0.86} & 0.86 & 0.86 & 0.86 & 0.85 & 0.85 \\
+    
+$\epsilon$ & \textbf{0.21} & 0.06 & 0.07 & 0.08 & 0.09 & 0.09 & 0.10 & \textbf{0.11} & 0.12 & 0.12 & 0.13 & 0.15 & 0.16 \\
+$\epsilon_{\text{eff}}$ & \textbf{0.21} & 0.07 & 0.09 & 0.11 & 0.13 & 0.14 & 0.18 & \textbf{0.20 } & 0.22 & 0.25 & 0.29 & 0.37 & 0.40 \\ \hline
+    
+$\eta \cdot 10^2$ & \textbf{1.13} & 1.54 & 1.47 & 1.44 & 1.41 & 1.38 & 1.34 & \textbf{1.32} & 1.31 & 1.29 & 1.26 & 1.23 & 1.21 \\
+$\eta_{\text{eff}} \cdot 10^2$ & \textbf{1.13} & 1.77 & 1.80 & 1.84 & 1.89 & 1.93 & 2.01 & \textbf{2.08} & 2.14 & 2.19 & 2.26 & 2.39 & 2.45 \\
+    
+$\tau_k \cdot 10^1$ & \textbf{0.84} & 1.58 & 1.45 & 1.38 & 1.32 & 1.28 & 1.21 & \textbf{1.17} & 1.14 & 1.10 & 1.06 & 1.00 & 0.98 \\
+$\tau_{k, \text{eff}} \cdot 10^1$ & \textbf{0.84} & 1.74 & 1.65 & 1.62 & 1.60 & 1.60 & 1.57 & \textbf{1.58} & 1.58 & 1.57 & 1.56 & 1.56 & 1.56 \\ \hline
+    
+$L_s$ & \textbf{1.46} & 1.54 & 1.52 & 1.51 & 1.51 & 1.51 & 1.50 & \textbf{1.50} & 1.51 & 1.50 & 1.50 & 1.52 & 1.52 \\
+$T_e$ & \textbf{3.62} & 12.17 & 10.32 & 9.38 & 8.67 & 8.11 & 7.25 & \textbf{6.77} & 6.44 & 6.02 & 5.55 & 4.89  & 4.62 \\
+$T_{e, \text{eff}}$ & \textbf{3.62} & 10.06 & 7.87 & 6.70 & 5.84 & 5.18 & 4.23 & \textbf{3.70} & 3.34 & 2.96 & 2.53 & 1.99 & 1.79 \\ \hline
+    
+$\lambda \cdot 10$ & \textbf{2.86} & 5.25 & 4.82 & 4.59 & 4.42 & 4.27 & 4.04 & \textbf{3.90} & 3.81 & 3.68 & 3.53 & 3.31 & 3.22 \\
+$\lambda_{\text{eff}} \cdot 10$ & \textbf{2.86} & 5.72 & 5.49 & 5.41 & 5.36 & 5.32 & 5.26 & \textbf{5.25} & 5.25 & 5.22 & 5.20 & 5.16 & 5.13 \\
+$R_{\lambda} \cdot 10^{-2}$ & \textbf{1.66} & 2.97 & 2.76 & 2.64 & 2.54 & 2.46 & 2.33 & \textbf{2.24} & 2.18 & 2.11 & 2.03 & 1.89 & 1.83 \\
+$R_{\lambda, \text{eff}} \cdot 10^{-2}$ & \textbf{1.66} & 2.69 & 2.40 & 2.22 & 2.08 & 1.95 & 1.77 & \textbf{1.65} & 1.56 & 1.48 & 1.36 & 1.20 & 1.13 \\ \hline
+\end{tabular}
+\caption{Raw (not considering effective viscosity $\nu_{\text{eff}}$) and ``effective'' statistics (in spectral units) of turbulent flows simulated using LES where different values of $C_K$ parameter in Equation \ref{eqn:sgs-2} were used. 
+All simulations were run with $N=64$ (LES), $\nu = 1.5 \times 10^{-3}$, $\Delta t = 9 \times 10^{-4}$ and using deterministic forcing scheme.
+Uncertainties of presented values were omitted for clarity and are of similar order as these for corresponding values in Table \ref{tab:flow-stats}.
+Column in bold, for $C_K=2.5$, refers to the simulation used as LES background flow in actual study. \\
+* -- statistics for respective DNS are shown for comparison.
+}
+\label{tab:sgs-stats}
+\end{table}
+
+
+
+%%% ==================== %%%
+%%%      APPENDIX C      %%%
+%%% ==================== %%%
+
+
+% TABLE C-01 - SUPER-PARTICLE FACTORS FOR SIMULATIONS WITH FIXED MASS LOADINGS 
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{l|rr|rr|rr|rr|rr}
+\multicolumn{11}{c}{\textbf{DNS}} \\ \hline
+& \multicolumn{2}{c|}{$20$~$\upmu\text{m}$} & \multicolumn{2}{c|}{$30$~$\upmu\text{m}$} & \multicolumn{2}{c|}{$40$~$\upmu\text{m}$} & \multicolumn{2}{c|}{$50$~$\upmu\text{m}$} & \multicolumn{2}{c}{$60$~$\upmu\text{m}$} \\
+$\mathbf{\Phi_m}$ & $N_{\text{part}}$ & $M$ & $N_{\text{part}}$ & $M$ & $N_{\text{part}}$ & $M$ & $N_{\text{part}}$ & $M$ & $N_{\text{part}}$ & $M$ \\ \hline
+0.01 & 10.789 & 1 & 3.197 & 1 & 1.349 & 1 & 0.691 & 1 & 0.400 & 1 \\ 
+0.05 & 53.945 & 5 & 15.984 & 2 & 6.743 & 1 & 3.453 & 1 & 1.998 & 1 \\ 
+0.10 & 107.891 & 10 & 31.968 & 4 & 13.486 & 2 & 6.905 & 1 & 3.996 & 1 \\ 
+0.50 & 539.453 & 50 & 159.838 & 20 & 67.432 & 10 & 34.525 & 4 & 19.980 & 2 \\  
+1.00 & 1 078.906 & 100 & 319.676 & 40 & 134.863 & 20 & 69.050 & 8 & 39.959 & 4 \\ \hline 
+\end{tabular}
+\caption{The super-particle factors, $M$, and approximate effective number of particles in millions, $N_{\text{part}}$, for DNS simulations used in plots depending on particle radius, $a$, and for fixed values of the particle mass loading, $\Phi_m$.
+The values of $M$ for LES are, in general, equal to twice the value shown for DNS (except when $N_{\text{part}} < 5 \, \text{million}$, where $M=1$).
+}
+\label{tab:spp-phic}
+\end{table}
+
+% TABLE C-02 - PARTICLE COUNTS AND MASS LOADINGS FOR SIMULATIONS WITH LESS THAN 20M PARTICLES
+        
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{lrrrrrrrrrrr}
+$N_{\text{part}}$ [millions] & 1 & 2 & 3 & 4 & 5 & 6 & 8 & 10 & 12 & 15 & 20 \\ \hline
+$\Phi_m$ [$a = 30$~$\upmu\text{m}$] & 0.003 & 0.006 & 0.009 & 0.013 & 0.016 & 0.019 & 0.025 & 0.31 & 0.038 & 0.047 & 0.063 \\
+$\Phi_m$ [$a = 40$~$\upmu\text{m}$] & 0.007 & 0.015 & 0.022 & 0.030 & 0.037 & 0.044 & 0.059 & 0.074 & 0.089 & 0.111 & 0.148 \\
+$M$ [LES only] & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 4 \\
+\end{tabular}
+\caption{Respective values of particle mass loading, $\Phi_m$, for simulations with smaller amount of particles (up to $20$ million) for ${a = 30}$~$\upmu\text{m}$ and ${a = 40}$~$\upmu\text{m}$.
+Bottom row lists necessary values of $M$ used for super-particle parameterisation in LES.
+}
+\label{tab:spp-base}
+\end{table}
+
+% TABLE C-03 - PARTICLE COUNTS AND MASS LOADINGS FOR SIMULATIONS WITH MORE THAN 20M PARTICLES
+
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{lrrrrrrrrrrrrrr}
+$N_{\text{part}}$ [millions] & 30 & 40 & 60 & 80 & 100 & 120 & 140 & 160 & 180 & 200 & 250 & 300 & 350 & 400 \\ \hline
+$\Phi_m$ [$a = 30$~$\upmu\text{m}$] & 0.09 & 0.13 & 0.19 & 0.25 & 0.31 & 0.38 & 0.44 & 0.50 & 0.56 & 0.63 & 0.78 & 0.94 & 1.09 & 1.25 \\
+$\Phi_m$ [$a = 40$~$\upmu\text{m}$] & 0.22 & 0.30 & 0.44 & 0.59 & 0.74 & 0.89 & 1.04 & 1.19 & 1.33 & 1.48 & 1.85 & 2.22 & 2.60 & 2.97 \\
+\end{tabular}
+\caption{Respective values of mass loading, $\Phi_m$, for simulations with larger number of particles (higher than $20$ million) for ${a = 30}$~$\upmu\text{m}$ and ${a = 40}$~$\upmu\text{m}$.
+}
+\label{tab:spp-ext}
 \end{table}
