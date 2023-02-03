@@ -62,6 +62,7 @@
       {\large \@date\par}
     \end{center}
     \@thanks
+    \cleardoublepage
   \end{titlepage}%
 %  \begin{titlepage}
 %    \c@page=2
@@ -174,7 +175,7 @@
   \nobreak\vfil\null\endtitlepage
 
   \titlepage
-  \c@page=4
+  \c@page=3
   \null\nobreak\vfil
   \@beginparpenalty\@lowpenalty
   \begin{center}%
