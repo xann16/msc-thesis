@@ -139,7 +139,7 @@
 
 \renewenvironment{abstract}{%
   \titlepage
-   \c@page=3
+    \c@page=3
   \null\nobreak\vfil
   \@beginparpenalty\@lowpenalty
   \begin{center}%
@@ -175,7 +175,7 @@
   \nobreak\vfil\null\endtitlepage
 
   \titlepage
-  \c@page=3
+   \c@page=5
   \null\nobreak\vfil
   \@beginparpenalty\@lowpenalty
   \begin{center}%
